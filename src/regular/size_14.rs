@@ -5,11 +5,16 @@
 //! Latin-1 Supplement and Latin extended A. This means the typical letters
 //! and symbols from a QWERTZ/QWERTY keyboard plus symbols such as Ö, Ä,
 //! and Ü.
+//!
+//! # Font License
+//! * Downloaded from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
+//! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
 /// The height of each bitmap character for the given font weight
 /// and size. This size corresponds to the size of the module name.
 /// The font size will be a few percent smaller, because each
 /// bitmap contains a small vertical padding.
+#[allow(dead_code)]
 pub const BITMAP_HEIGHT: usize = 14;
 
 /// The width of each bitmap character for the given font weight
@@ -1854,23 +1859,6 @@ pub const fn get_char(c: char) -> &'static [&'static [u8]] {
             &[5, 50, 50, 50, 50, 188, 46, 0],
             &[0, 0, 0, 0, 0, 171, 46, 0],
             &[0, 0, 0, 0, 0, 79, 21, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-        ],
-        // letter: '­' / 0xad
-        '­' => &[
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 36, 184, 184, 184, 73, 0, 0],
-            &[0, 12, 61, 61, 61, 24, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0],
@@ -5445,6 +5433,6 @@ pub const fn get_char(c: char) -> &'static [&'static [u8]] {
             &[0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0],
         ],
-        _ => panic!("unsupported char")
+        _ => panic!("unsupported char"),
     }
 }

@@ -1,5 +1,5 @@
 use crate::unicode::UnicodeIter;
-use fontdue::{Font, FontResult, FontSettings};
+use fontdue::{Font, FontSettings};
 
 const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.ttf");
 const NOTO_SANS_MONO_BOLD: &[u8] = include_bytes!("res/NotoSansMono-Bold.ttf");
@@ -97,7 +97,13 @@ impl ToBitmapFont {
         // in `rasterize_to_bitmap()`
         let font_size = (bitmap_height as f32 * 0.84).ceil();
 
-        let font = Self::get_fontdue_font(font_bytes, font_size).unwrap();
+        let font = Font::from_bytes(
+            font_bytes,
+            FontSettings {
+                scale: font_size,
+                ..Default::default()
+            },
+        ).unwrap();
 
         let bitmap_width = Self::find_max_width(&font, font_size);
 
@@ -153,13 +159,6 @@ impl ToBitmapFont {
         }
 
         letter_bitmap
-    }
-
-    /// Creates the font object from [`fontdue`] optimized for the selected font size.
-    fn get_fontdue_font(font_bytes: &[u8], font_size: f32) -> FontResult<Font> {
-        let mut fontdue_settings = FontSettings::default();
-        fontdue_settings.scale = font_size;
-        Font::from_bytes(font_bytes, fontdue_settings)
     }
 
     /// A brute force approach to find the maximum width, that a supported unicode

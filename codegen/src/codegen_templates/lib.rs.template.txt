@@ -34,6 +34,36 @@
 
 // %CODEGEN_LIB_MODULES%
 
+/// Describes the relevant information for a rendered char of the bitmap font.
+pub struct BitmapChar {
+    /// The actual bitmap that is `height` * `width` big. Each bitmap value reaches
+    /// from 0 to 255 and describes the intensity of this pixel.
+    bitmap: &'static [&'static [u8]],
+    /// Height of the bitmap box. The actual font size is slightly smaller.
+    height: usize,
+    /// The width of the bitmap char. It is guaranteed, that all chars
+    /// of the same font width and bitmap height also have the same size.
+    /// As you can naturally expect from a mono font.. :)
+    width: usize,
+}
+
+impl BitmapChar {
+    #[inline]
+    pub const fn bitmap(&self) -> &'static [&'static [u8]] {
+        self.bitmap
+    }
+
+    #[inline]
+    pub const fn height(&self) -> usize {
+        self.height
+    }
+
+    #[inline]
+    pub const fn width(&self) -> usize {
+        self.width
+    }
+}
+
 /// Supported font weights.
 ///
 /// The available variants depend on the selected Cargo build features.
@@ -45,6 +75,7 @@ pub enum FontWeight {
 
 impl FontWeight {
     /// Returns the numeric value of the enum variant.
+    #[inline]
     pub const fn val(self) -> usize {
         self as _
     }
@@ -65,16 +96,23 @@ pub enum BitmapHeight {
 
 impl BitmapHeight {
     /// Returns the numeric value of the variant.
+    #[inline]
     pub const fn val(self) -> usize {
         self as _
     }
 }
 
-/// Returns the bitmap for the given char, [`FontWeight`], and [`BitmapHeight`].
+/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`BitmapHeight`].
 #[inline]
-pub const fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> &'static [&'static [u8]] {
-    match style {
+pub const fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> BitmapChar {
+    let bitmap = match style {
 // %CODEGEN_GET_BITMAP%
+    };
+
+    BitmapChar {
+        bitmap,
+        height: size.val(),
+        width: get_bitmap_width(style, size)
     }
 }
 

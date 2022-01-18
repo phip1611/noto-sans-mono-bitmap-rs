@@ -5,11 +5,16 @@
 //! Latin-1 Supplement and Latin extended A. This means the typical letters
 //! and symbols from a QWERTZ/QWERTY keyboard plus symbols such as Ö, Ä,
 //! and Ü.
+//!
+//! # Font License
+//! * Downloaded from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
+//! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
 /// The height of each bitmap character for the given font weight
 /// and size. This size corresponds to the size of the module name.
 /// The font size will be a few percent smaller, because each
 /// bitmap contains a small vertical padding.
+#[allow(dead_code)]
 pub const BITMAP_HEIGHT: usize = 22;
 
 /// The width of each bitmap character for the given font weight
@@ -2715,31 +2720,6 @@ pub const fn get_char(c: char) -> &'static [&'static [u8]] {
             &[0, 0, 0, 0, 0, 0, 0, 0, 71, 161, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 71, 161, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 37, 85, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ],
-        // letter: '­' / 0xad
-        '­' => &[
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 26, 179, 179, 179, 179, 179, 98, 0, 0, 0],
-            &[0, 0, 11, 73, 73, 73, 73, 73, 40, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -7997,6 +7977,6 @@ pub const fn get_char(c: char) -> &'static [&'static [u8]] {
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ],
-        _ => panic!("unsupported char")
+        _ => panic!("unsupported char"),
     }
 }

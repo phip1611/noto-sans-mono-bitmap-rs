@@ -25,7 +25,7 @@ fn main() {
 fn codegen_cargo_toml() {
     // let mut path = PathBuf::from(CODEGEN_BASE_PATH);
     let mut path = PathBuf::from("..");
-    path.push(format!("Cargo.toml"));
+    path.push("Cargo.toml");
 
     let mut cargo_toml_file = File::options()
         .create(true)
@@ -73,7 +73,7 @@ fn codegen_cargo_toml() {
 /// Generates the lib.rs with all relevant features.
 fn codegen_lib_rs() {
     let mut path = PathBuf::from(CODEGEN_BASE_PATH);
-    path.push(format!("lib.rs"));
+    path.push("lib.rs");
 
     let mut cargo_toml_file = File::options()
         .create(true)
@@ -237,10 +237,10 @@ fn codegen_lib_rs() {
 /// Creates a font weight module, like `bold/mod.rs`.
 fn codegen_font_weight_module(font_bytes: &[u8], weight: &FontWeight) {
     let mut mod_file_path = PathBuf::from(CODEGEN_BASE_PATH);
-    mod_file_path.push(format!("{}", weight.mod_name()));
+    mod_file_path.push(weight.mod_name());
     // ignore error; dir might exist
     let _ = create_dir(&mod_file_path);
-    mod_file_path.push(format!("mod.rs"));
+    mod_file_path.push("mod.rs");
 
     let mut mod_file = File::options()
         .create(true)
@@ -271,7 +271,7 @@ fn codegen_font_weight_module(font_bytes: &[u8], weight: &FontWeight) {
 /// Creates `bold/size_10.rs` etc. and adds it to `bold/mod.rs`.
 fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
     let mut mod_file_path = PathBuf::from(CODEGEN_BASE_PATH);
-    mod_file_path.push(format!("{}", weight.mod_name()));
+    mod_file_path.push(weight.mod_name());
     mod_file_path.push(format!("size_{}.rs", font.bitmap_height()));
 
     let mut size_mod_file = File::options()

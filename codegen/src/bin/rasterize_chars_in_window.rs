@@ -20,7 +20,7 @@ fn main() {
     // set white background
     for i in draw_buffer.iter_mut() {
         let (r, g, b) = (255, 255, 255);
-        let rgb_32 = 0 << 24 | r << 16 | g << 8 | b;
+        let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
         *i = rgb_32;
     }
 
@@ -31,7 +31,7 @@ fn main() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
-                let rgb_32 = 0 << 24 | r << 16 | g << 8 | b;
+                let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
 
                 let index = char_i * font.bitmap_width() + col_i + row_i * width;
 
@@ -43,7 +43,7 @@ fn main() {
     // draw red borders for 3x1 grid
     for border_i in 1..msg.chars().count() {
         let (r, g, b) = (255, 0, 0);
-        let rgb_32 = 0 << 24 | r << 16 | g << 8 | b;
+        let rgb_32 = /*0 << 24 |*/ r << 16 | g << 8 | b;
         for j in 0..height {
             let index = border_i * font.bitmap_width() + j * width;
             draw_buffer[index] = rgb_32;

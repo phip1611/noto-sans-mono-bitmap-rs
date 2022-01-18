@@ -41,14 +41,14 @@ impl BitmapHeight {
 }
 
 /// Used as template to generate Rust modules for a specific font size.
-pub const SIZE_MOD_TEMPLATE: &'static str = include_str!("codegen_templates/size_mod.template.txt");
+pub const SIZE_MOD_TEMPLATE: &str = include_str!("codegen_templates/size_mod.template.txt");
 /// Used as template to generate Rust modules for a specific font weight.
-pub const WEIGHT_MOD_TEMPLATE: &'static str =
+pub const WEIGHT_MOD_TEMPLATE: &str =
     include_str!("codegen_templates/weight_mod.template.txt");
 /// Used as template to generate the Cargo.toml.
-pub const CARGO_TOML_TEMPLATE: &'static str = include_str!("codegen_templates/Cargo.toml.txt");
+pub const CARGO_TOML_TEMPLATE: &str = include_str!("codegen_templates/Cargo.toml.txt");
 /// Used as template to generate the lib.rs.
-pub const CARGO_LIB_RS: &'static str = include_str!("codegen_templates/lib.rs.template.txt");
+pub const CARGO_LIB_RS: &str = include_str!("codegen_templates/lib.rs.template.txt");
 
 /// Path into the main repository, where the codegen manipulates files.
-pub const CODEGEN_BASE_PATH: &'static str = "../src/";
+pub const CODEGEN_BASE_PATH: &str = "../src/";
