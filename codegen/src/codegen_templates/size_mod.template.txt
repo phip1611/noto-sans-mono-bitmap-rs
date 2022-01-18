@@ -1,0 +1,18 @@
+//! Module for letters with the font weight %FONT_WEIGHT% and size %FONT_SIZE%.
+//!
+//! The bitmap font contains all unicode symbols from 0x00 to 0x17f with
+//! the exception of control characters. It includes Basic Latin
+//! Latin-1 Supplement and Latin extended A. This means the typical letters
+//! and symbols from a QWERTZ/QWERTY keyboard plus symbols such as Ö, Ä,
+//! and Ü.
+
+/// The height of each bitmap character for the given font weight
+/// and size. This size corresponds to the size of the module name.
+/// The font size will be a few percent smaller, because each
+/// bitmap contains a small vertical padding.
+pub const BITMAP_HEIGHT: usize = %CODEGEN_BITMAP_HEIGHT%;
+
+/// The width of each bitmap character for the given font weight
+/// and size. This is a few percent less than [`BITMAP_HEIGHT`],
+/// because the bitmap font doesn't contain horizontal padding.
+pub const BITMAP_WIDTH: usize = %CODEGEN_BITMAP_WIDTH%;
