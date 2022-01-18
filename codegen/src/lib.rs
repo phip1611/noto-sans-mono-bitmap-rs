@@ -3,9 +3,6 @@
 pub mod font;
 pub mod unicode;
 
-use fontdue::Font;
-use std::ops::{Index, RangeInclusive};
-
 /// The height of the bitmap for the font rasterization.
 /// The width will be a little bit less. Furthermore, the
 /// font size is also less than the bitmap height, because

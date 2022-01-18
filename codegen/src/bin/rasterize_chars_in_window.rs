@@ -1,8 +1,8 @@
 //! Helper binary to rasterize a few letters with fontdue in a window and display its
 //! rasterized dimensions.
 
-use minifb::{Key, Window, WindowOptions};
 use codegen::font::ToBitmapFont;
+use minifb::{Key, Window, WindowOptions};
 
 fn main() {
     // letters we want to print

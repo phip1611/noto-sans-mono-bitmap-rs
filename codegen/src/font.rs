@@ -16,7 +16,6 @@ pub fn noto_font_by_weight(typ: &FontWeight) -> &'static [u8] {
     NOTO_SANS_FAMILY[typ.val()]
 }
 
-
 /// This is a partially a copy from the code in `codegen_templates/lib.rs.template.txt`
 /// or a template for it.
 /// Supported font weights.
@@ -130,7 +129,7 @@ impl ToBitmapFont {
 
                 // align to vertical center
                 // 1) bounds:height: align big letters to groundline regarding the font size
-                let mut y_offset = (self.font_size as isize - metrics.height as isize);
+                let mut y_offset = self.font_size as isize - metrics.height as isize;
                 // 2) move downwards, because there are parts "below the ground line"  (like in y)
                 y_offset -= metrics.ymin as isize;
                 // 3) move everything slightly to the top; I figured this out by trying with
@@ -169,7 +168,7 @@ impl ToBitmapFont {
     /// would indicate a big space between all letters.
     fn find_max_width(font: &Font, font_size: f32) -> usize {
         UnicodeIter::new()
-            .filter(|x| x.is_char())
+            .filter(|x| x.is_visible_char())
             .map(|s| s.get_char())
             .map(|c| font.rasterize(c, font_size).0.width)
             .max()

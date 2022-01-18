@@ -1,19 +1,23 @@
 /// Return type for the [`UnicodeIter`] iterator.
 #[derive(Debug)]
 pub enum UnicodeSymbol {
+    // Regular chars/symbols.
     Char(char),
+    // for example U+00AD (soft hyphen)
+    NonDisplayableSymbol(char),
+    // Control sequences such as ESC and DEL.
     Control,
 }
 
 impl UnicodeSymbol {
-    pub fn is_char(&self) -> bool {
+    pub fn is_visible_char(&self) -> bool {
         matches!(self, Self::Char(_))
     }
 
     pub fn get_char(&self) -> char {
         match self {
             UnicodeSymbol::Char(c) => *c,
-            UnicodeSymbol::Control => panic!("not a char")
+            _ => panic!("not a char"),
         }
     }
 }
@@ -36,10 +40,10 @@ impl UnicodeIter {
 }
 
 impl Iterator for UnicodeIter {
-    type Item = (UnicodeSymbol);
+    type Item = UnicodeSymbol;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.counter > Self::LIMIT  {
+        if self.counter > Self::LIMIT {
             return None;
         }
 
@@ -49,7 +53,9 @@ impl Iterator for UnicodeIter {
             0x20..=0x7e => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
             0x7f => UnicodeSymbol::Control,
             0x80..=0x9f => UnicodeSymbol::Control,
-            0xa0..=Self::LIMIT => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
+            0xa0..=0xac => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
+            0xad => UnicodeSymbol::NonDisplayableSymbol(char::from_u32(self.counter).unwrap()),
+            0xae..=Self::LIMIT => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
             _ => panic!("Out of range"),
         };
 

@@ -225,7 +225,10 @@ fn codegen_lib_rs() {
                     font_size_enum_variants.as_str()
                 )
                 .replace("// %CODEGEN_GET_BITMAP%", get_bitmap_match.as_str())
-                .replace("// %CODEGEN_GET_BITMAP_WIDTH%", get_bitmap_width_match.as_str())
+                .replace(
+                    "// %CODEGEN_GET_BITMAP_WIDTH%",
+                    get_bitmap_width_match.as_str()
+                )
         )
         .unwrap();
     }
@@ -286,8 +289,14 @@ fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
         SIZE_MOD_TEMPLATE
             .replace("%FONT_WEIGHT%", weight.mod_name())
             .replace("%FONT_SIZE%", &format!("{}", font.bitmap_height()))
-            .replace("%CODEGEN_BITMAP_HEIGHT%", &format!("{}", font.bitmap_height()))
-            .replace("%CODEGEN_BITMAP_WIDTH%", &format!("{}", font.bitmap_width()))
+            .replace(
+                "%CODEGEN_BITMAP_HEIGHT%",
+                &format!("{}", font.bitmap_height())
+            )
+            .replace(
+                "%CODEGEN_BITMAP_WIDTH%",
+                &format!("{}", font.bitmap_width())
+            )
     )
     .unwrap();
 
@@ -311,7 +320,7 @@ fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
     writeln!(&mut code_range_string, "    match c {{").unwrap();
 
     UnicodeIter::new()
-        .filter(|s| s.is_char())
+        .filter(|s| s.is_visible_char())
         .map(|s| s.get_char())
         .map(|char| (char, font.rasterize_to_bitmap(char)))
         .for_each(|(char, bitmap)| {
