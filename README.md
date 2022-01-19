@@ -83,4 +83,4 @@ to run them. This is not necessary, if you just use this crate as dependency.
 See LICENSE file in repository.
 
 # MSRV
-1.56.1 stable, because this crate uses the Rust 2021 edition.
+Rust stable 1.52.1.
