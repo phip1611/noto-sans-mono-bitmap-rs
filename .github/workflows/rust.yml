@@ -1,0 +1,42 @@
+name: Build
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+env:
+    CARGO_TERM_COLOR: always
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                rust:
+                    - stable
+                    - nightly
+                    - 1.56.1 # MSVR
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: Build
+                run: cargo build --verbose
+                # the library itself has no tests but the codegen project has tests
+            -   name: Run tests
+                run: cargo test
+
+    style_checks:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                rust:
+                    - stable
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: Rustfmt
+                run: cargo fmt -- --check
+            -   name: Clippy
+                run: cargo clippy
+            -   name: Rustdoc
+                run: cargo doc
