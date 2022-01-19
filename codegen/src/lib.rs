@@ -1,5 +1,25 @@
 //! Codegen utilities for the main codegen binary and examples/sub binaries in `src/bin`.
 
+#![deny(
+    clippy::all,
+    clippy::cargo,
+    clippy::nursery,
+    // clippy::restriction,
+    // clippy::pedantic
+)]
+// now allow a few rules which are denied by the above statement
+// --> they are ridiculous and not necessary
+#![allow(
+    clippy::suboptimal_flops,
+    clippy::redundant_pub_crate,
+    clippy::fallible_impl_from
+)]
+// this comes from the minifb dependency and I can't do anything about it
+#![allow(clippy::multiple_crate_versions)]
+#![deny(missing_debug_implementations)]
+#![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
+
 pub mod font;
 pub mod unicode;
 
@@ -43,8 +63,7 @@ impl BitmapHeight {
 /// Used as template to generate Rust modules for a specific font size.
 pub const SIZE_MOD_TEMPLATE: &str = include_str!("codegen_templates/size_mod.template.txt");
 /// Used as template to generate Rust modules for a specific font weight.
-pub const WEIGHT_MOD_TEMPLATE: &str =
-    include_str!("codegen_templates/weight_mod.template.txt");
+pub const WEIGHT_MOD_TEMPLATE: &str = include_str!("codegen_templates/weight_mod.template.txt");
 /// Used as template to generate the Cargo.toml.
 pub const CARGO_TOML_TEMPLATE: &str = include_str!("codegen_templates/Cargo.toml.txt");
 /// Used as template to generate the lib.rs.

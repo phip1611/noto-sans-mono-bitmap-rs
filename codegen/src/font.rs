@@ -12,7 +12,7 @@ const NOTO_SANS_FAMILY: [&[u8]; 3] = [
     NOTO_SANS_MONO_BOLD,
 ];
 
-pub fn noto_font_by_weight(typ: &FontWeight) -> &'static [u8] {
+pub const fn noto_font_by_weight(typ: &FontWeight) -> &'static [u8] {
     NOTO_SANS_FAMILY[typ.val()]
 }
 
@@ -76,6 +76,7 @@ macro_rules! trim_index_to_bounds {
 ///
 /// The raster is not XxX but XxY, because a mono font not necessarily needs to
 /// be XxX, as long as each character has the same width.
+#[derive(Debug)]
 pub struct ToBitmapFont {
     font: Font,
     bitmap_height: usize,
@@ -103,7 +104,8 @@ impl ToBitmapFont {
                 scale: font_size,
                 ..Default::default()
             },
-        ).unwrap();
+        )
+        .unwrap();
 
         let bitmap_width = Self::find_max_width(&font, font_size);
 
@@ -174,13 +176,13 @@ impl ToBitmapFont {
             .unwrap()
     }
 
-    pub fn bitmap_height(&self) -> usize {
+    pub const fn bitmap_height(&self) -> usize {
         self.bitmap_height
     }
-    pub fn bitmap_width(&self) -> usize {
+    pub const fn bitmap_width(&self) -> usize {
         self.bitmap_width
     }
-    pub fn font_size(&self) -> f32 {
+    pub const fn font_size(&self) -> f32 {
         self.font_size
     }
 }

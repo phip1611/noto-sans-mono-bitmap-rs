@@ -10,7 +10,7 @@ pub enum UnicodeSymbol {
 }
 
 impl UnicodeSymbol {
-    pub fn is_visible_char(&self) -> bool {
+    pub const fn is_visible_char(&self) -> bool {
         matches!(self, Self::Char(_))
     }
 
