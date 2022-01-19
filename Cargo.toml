@@ -1,7 +1,19 @@
 [package]
 name = "noto-sans-mono-bitmap"
+description = """
+Contains the "Noto Sans Mono" font as pre-rasterized bitmap font in different sizes and
+font weights. This crate is `no_std` and needs no allocations or floating point operations.
+Useful in kernels and bootloaders when only "soft-float" is available.
+"""
 version = "0.1.0"
 edition = "2021"
+keywords = ["bitmap", "font", "noto-sans-mono"]
+categories = ["text-processing"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
+repository = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
+documentation = "https://docs.rs/noto-sans-mono-bitmap"
 
 exclude = [
     "src/res/",
