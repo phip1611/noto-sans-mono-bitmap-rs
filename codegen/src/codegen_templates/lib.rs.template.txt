@@ -56,7 +56,9 @@
 //! By default, all sizes and font styles/weights are included via the cargo feature `all`.
 //! This can be restricted by only using features such as `regular` and `size_14`. Anyhow,
 //! a test of mine showed, that including all features in a release build only increases the
-//! file size by a few dozen kilobytes.
+//! file size by a few dozen to a few hundred kilobytes. The Rust compiler is really smart
+//! throwing out unused parts of the bitmap font, even if they are included as dependency.
+//! Your binary will not be bloated by a few megabytes, according to my findings.
 //!
 //! The bitmap font includes the following unicode range:
 //! - BASIC LATIN,
