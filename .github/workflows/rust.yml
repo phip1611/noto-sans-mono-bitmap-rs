@@ -20,6 +20,7 @@ jobs:
                     - 1.56.1 # MSVR
         steps:
             -   uses: actions/checkout@v2
+            -   run: sudo apt update && sudo apt install libxkbcommon-dev -y
             -   name: Build
                 run: cargo build --verbose
                 # the library itself has no tests but the codegen project has tests
