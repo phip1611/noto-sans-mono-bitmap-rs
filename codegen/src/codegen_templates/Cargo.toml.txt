@@ -16,7 +16,9 @@ repository = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
 documentation = "https://docs.rs/noto-sans-mono-bitmap"
 
 exclude = [
-    "src/res/",
+    ".editorconfig",
+    "codegen_n_build.sh",
+    "CODEGEN.md",
     "examples",
 ]
 
