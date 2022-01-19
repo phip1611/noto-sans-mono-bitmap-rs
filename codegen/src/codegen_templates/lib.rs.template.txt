@@ -18,11 +18,12 @@
 //! Furthermore, in my experience it was hard to get some of the popular font rasterization
 //! crates to compile with CPU features "+soft-float" and "-sse" (at least on x86_64).
 //!
-//! Legacy 8x8 bitmap fonts are ugly to be printed to the screen. My crate can be seen as a nice
+//! Legacy 8x8 bitmap fonts are ugly when printed to the screen. My crate can be seen as a nice
 //! replacement with very nice anti-aliasing.
 //!
 //! If you have a standard environment or support for floating point operations, you might want
-//! to rasterize the font by yourself instead using a crate such as `fontdue` and some TTF fonts.
+//! to rasterize the font by yourself with the crate `fontdue` and some TTF fonts rather than
+//! using my crate.
 //!
 //! # Minimal Code Example
 //! ```rust
