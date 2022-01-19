@@ -10,7 +10,8 @@ fn main() {
         FontWeight::Regular,
         BitmapHeight::Size16.val()
     );
-    let bitmap_char = get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16);
+    let bitmap_char =
+        get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16).expect("unknown char");
     println!("{:?}", bitmap_char);
     for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {

@@ -159,17 +159,19 @@ impl BitmapHeight {
 }
 
 /// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`BitmapHeight`].
+///
+/// Returns None, if the given char is not known by the bitmap font.
 #[inline]
-pub const fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> BitmapChar {
+pub fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> Option<BitmapChar> {
     let bitmap = match style {
 // %CODEGEN_GET_BITMAP%
     };
 
-    BitmapChar {
+    bitmap.map(|bitmap| BitmapChar {
         bitmap,
         height: size.val(),
         width: get_bitmap_width(style, size)
-    }
+    })
 }
 
 /// Returns the bitmap width for the given [`FontWeight`] and [`BitmapHeight`].

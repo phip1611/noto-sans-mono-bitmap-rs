@@ -181,76 +181,75 @@ impl BitmapHeight {
 }
 
 /// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`BitmapHeight`].
+///
+/// Returns None, if the given char is not known by the bitmap font.
 #[inline]
-pub const fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> BitmapChar {
+pub fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> Option<BitmapChar> {
     let bitmap = match style {
         #[cfg(feature = "light")]
-        FontWeight::Light => match size.val() {
+        FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::light::size_14::get_char(c),
+            BitmapHeight::Size14 => crate::light::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            16 => crate::light::size_16::get_char(c),
+            BitmapHeight::Size16 => crate::light::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            18 => crate::light::size_18::get_char(c),
+            BitmapHeight::Size18 => crate::light::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            20 => crate::light::size_20::get_char(c),
+            BitmapHeight::Size20 => crate::light::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            22 => crate::light::size_22::get_char(c),
+            BitmapHeight::Size22 => crate::light::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            24 => crate::light::size_24::get_char(c),
+            BitmapHeight::Size24 => crate::light::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            32 => crate::light::size_32::get_char(c),
+            BitmapHeight::Size32 => crate::light::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            64 => crate::light::size_64::get_char(c),
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::light::size_64::get_char(c),
         },
         #[cfg(feature = "regular")]
-        FontWeight::Regular => match size.val() {
+        FontWeight::Regular => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::regular::size_14::get_char(c),
+            BitmapHeight::Size14 => crate::regular::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            16 => crate::regular::size_16::get_char(c),
+            BitmapHeight::Size16 => crate::regular::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            18 => crate::regular::size_18::get_char(c),
+            BitmapHeight::Size18 => crate::regular::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            20 => crate::regular::size_20::get_char(c),
+            BitmapHeight::Size20 => crate::regular::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            22 => crate::regular::size_22::get_char(c),
+            BitmapHeight::Size22 => crate::regular::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            24 => crate::regular::size_24::get_char(c),
+            BitmapHeight::Size24 => crate::regular::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            32 => crate::regular::size_32::get_char(c),
+            BitmapHeight::Size32 => crate::regular::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            64 => crate::regular::size_64::get_char(c),
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::regular::size_64::get_char(c),
         },
         #[cfg(feature = "bold")]
-        FontWeight::Bold => match size.val() {
+        FontWeight::Bold => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::bold::size_14::get_char(c),
+            BitmapHeight::Size14 => crate::bold::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            16 => crate::bold::size_16::get_char(c),
+            BitmapHeight::Size16 => crate::bold::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            18 => crate::bold::size_18::get_char(c),
+            BitmapHeight::Size18 => crate::bold::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            20 => crate::bold::size_20::get_char(c),
+            BitmapHeight::Size20 => crate::bold::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            22 => crate::bold::size_22::get_char(c),
+            BitmapHeight::Size22 => crate::bold::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            24 => crate::bold::size_24::get_char(c),
+            BitmapHeight::Size24 => crate::bold::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            32 => crate::bold::size_32::get_char(c),
+            BitmapHeight::Size32 => crate::bold::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            64 => crate::bold::size_64::get_char(c),
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::bold::size_64::get_char(c),
         },
     };
 
-    BitmapChar {
+    bitmap.map(|bitmap| BitmapChar {
         bitmap,
         height: size.val(),
         width: get_bitmap_width(style, size),
-    }
+    })
 }
 
 /// Returns the bitmap width for the given [`FontWeight`] and [`BitmapHeight`].
@@ -260,64 +259,61 @@ pub const fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> Bitma
 pub const fn get_bitmap_width(style: FontWeight, size: BitmapHeight) -> usize {
     match style {
         #[cfg(feature = "light")]
-        FontWeight::Light => match size.val() {
+        FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::light::size_14::BITMAP_WIDTH,
+            BitmapHeight::Size14 => crate::light::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            16 => crate::light::size_16::BITMAP_WIDTH,
+            BitmapHeight::Size16 => crate::light::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            18 => crate::light::size_18::BITMAP_WIDTH,
+            BitmapHeight::Size18 => crate::light::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            20 => crate::light::size_20::BITMAP_WIDTH,
+            BitmapHeight::Size20 => crate::light::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            22 => crate::light::size_22::BITMAP_WIDTH,
+            BitmapHeight::Size22 => crate::light::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            24 => crate::light::size_24::BITMAP_WIDTH,
+            BitmapHeight::Size24 => crate::light::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            32 => crate::light::size_32::BITMAP_WIDTH,
+            BitmapHeight::Size32 => crate::light::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            64 => crate::light::size_64::BITMAP_WIDTH,
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::light::size_64::BITMAP_WIDTH,
         },
         #[cfg(feature = "regular")]
-        FontWeight::Regular => match size.val() {
+        FontWeight::Regular => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::regular::size_14::BITMAP_WIDTH,
+            BitmapHeight::Size14 => crate::regular::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            16 => crate::regular::size_16::BITMAP_WIDTH,
+            BitmapHeight::Size16 => crate::regular::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            18 => crate::regular::size_18::BITMAP_WIDTH,
+            BitmapHeight::Size18 => crate::regular::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            20 => crate::regular::size_20::BITMAP_WIDTH,
+            BitmapHeight::Size20 => crate::regular::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            22 => crate::regular::size_22::BITMAP_WIDTH,
+            BitmapHeight::Size22 => crate::regular::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            24 => crate::regular::size_24::BITMAP_WIDTH,
+            BitmapHeight::Size24 => crate::regular::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            32 => crate::regular::size_32::BITMAP_WIDTH,
+            BitmapHeight::Size32 => crate::regular::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            64 => crate::regular::size_64::BITMAP_WIDTH,
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::regular::size_64::BITMAP_WIDTH,
         },
         #[cfg(feature = "bold")]
-        FontWeight::Bold => match size.val() {
+        FontWeight::Bold => match size {
             #[cfg(feature = "size_14")]
-            14 => crate::bold::size_14::BITMAP_WIDTH,
+            BitmapHeight::Size14 => crate::bold::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            16 => crate::bold::size_16::BITMAP_WIDTH,
+            BitmapHeight::Size16 => crate::bold::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            18 => crate::bold::size_18::BITMAP_WIDTH,
+            BitmapHeight::Size18 => crate::bold::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            20 => crate::bold::size_20::BITMAP_WIDTH,
+            BitmapHeight::Size20 => crate::bold::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            22 => crate::bold::size_22::BITMAP_WIDTH,
+            BitmapHeight::Size22 => crate::bold::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            24 => crate::bold::size_24::BITMAP_WIDTH,
+            BitmapHeight::Size24 => crate::bold::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            32 => crate::bold::size_32::BITMAP_WIDTH,
+            BitmapHeight::Size32 => crate::bold::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            64 => crate::bold::size_64::BITMAP_WIDTH,
-            _ => panic!("unknown variant"),
+            BitmapHeight::Size64 => crate::bold::size_64::BITMAP_WIDTH,
         },
     }
 }

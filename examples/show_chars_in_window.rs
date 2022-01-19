@@ -15,7 +15,7 @@ fn main() {
 
     // rasterize each char and draw it into the framebuffer
     for (char_i, char) in msg.chars().enumerate() {
-        let bitmap_char = get_bitmap(char, font_weight, bitmap_height);
+        let bitmap_char = get_bitmap(char, font_weight, bitmap_height).expect("unknown char");
         for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);

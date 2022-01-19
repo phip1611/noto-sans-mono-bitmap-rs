@@ -157,7 +157,7 @@ fn codegen_lib_rs() {
             .unwrap();
             writeln!(
                 &mut get_bitmap_match,
-                "        FontWeight::{:?} => match size.val() {{",
+                "        FontWeight::{:?} => match size {{",
                 w
             )
             .unwrap();
@@ -170,19 +170,13 @@ fn codegen_lib_rs() {
                 .unwrap();
                 writeln!(
                     &mut get_bitmap_match,
-                    "            {} => crate::{}::size_{}::get_char(c),",
-                    size.val(),
+                    "            BitmapHeight::{:?} => crate::{}::size_{}::get_char(c),",
+                    size,
                     w.mod_name(),
                     size.val()
                 )
                 .unwrap();
             });
-
-            writeln!(
-                &mut get_bitmap_match,
-                "            _ => panic!(\"unknown variant\"),"
-            )
-            .unwrap();
             writeln!(&mut get_bitmap_match, "        }}").unwrap();
         });
     }
@@ -199,7 +193,7 @@ fn codegen_lib_rs() {
             .unwrap();
             writeln!(
                 &mut get_bitmap_width_match,
-                "        FontWeight::{:?} => match size.val() {{",
+                "        FontWeight::{:?} => match size {{",
                 w
             )
             .unwrap();
@@ -212,19 +206,13 @@ fn codegen_lib_rs() {
                 .unwrap();
                 writeln!(
                     &mut get_bitmap_width_match,
-                    "            {} => crate::{}::size_{}::BITMAP_WIDTH,",
-                    size.val(),
+                    "            BitmapHeight::{:?} => crate::{}::size_{}::BITMAP_WIDTH,",
+                    size,
                     w.mod_name(),
                     size.val()
                 )
                 .unwrap();
             });
-
-            writeln!(
-                &mut get_bitmap_width_match,
-                "            _ => panic!(\"unknown variant\"),"
-            )
-            .unwrap();
             writeln!(&mut get_bitmap_width_match, "        }}").unwrap();
         });
     }
@@ -334,7 +322,7 @@ fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
     writeln!(&mut code_range_string, "#[inline]").unwrap();
     writeln!(
         &mut code_range_string,
-        "pub const fn get_char(c: char) -> &'static [&'static [u8]] {{"
+        "pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {{"
     )
     .unwrap();
     writeln!(&mut code_range_string, "    match c {{").unwrap();
@@ -352,9 +340,9 @@ fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
             .unwrap();
 
             if char == '\\' || char == '\'' {
-                writeln!(&mut code_range_string, "        '\\{}' => &[", char).unwrap();
+                writeln!(&mut code_range_string, "        '\\{}' => Some(&[", char).unwrap();
             } else {
-                writeln!(&mut code_range_string, "        '{}' => &[", char).unwrap()
+                writeln!(&mut code_range_string, "        '{}' => Some(&[", char).unwrap()
             }
 
             for row in bitmap {
@@ -368,11 +356,11 @@ fn codegen_font_weight_sub_modules(font: ToBitmapFont, weight: &FontWeight) {
                 }
                 writeln!(&mut code_range_string, "],").unwrap();
             }
-            writeln!(&mut code_range_string, "        ],").unwrap();
+            writeln!(&mut code_range_string, "        ]),").unwrap();
         });
     writeln!(
         &mut code_range_string,
-        "        _ => panic!(\"unsupported char\")"
+        "        _ => None"
     )
     .unwrap();
     // close match
