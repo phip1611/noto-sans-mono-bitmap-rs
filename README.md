@@ -28,6 +28,30 @@ replacement with very nice anti-aliasing.
 If you have a standard environment or support for floating point operations, you might want
 to rasterize the font by yourself instead using a crate such as `fontdue` and some TTF fonts.
 
+# Minimal Code Example
+```rust
+use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapHeight, FontWeight};
+
+// Minimal example.
+fn main() {
+    let width = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
+    println!(
+        "Each char of the mono-spaced font will be {}px in width if the font \
+         weight={:?} and the bitmap height={}",
+        width,
+        FontWeight::Regular,
+        BitmapHeight::Size16.val()
+    );
+    let bitmap_char = get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16);
+    println!("{:?}", bitmap_char);
+    for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
+        for (col_i, pixel) in row.iter().enumerate() {
+            println!("[{:02}][{:02}]: {:03}", row_i, col_i, pixel);
+        }
+    }
+}
+```
+
 # Cargo build time features
 If all Cargo features are available, this bitmap fonts supports `light`, `regular`,
 and `bold`, but no `italic` style, because Noto Sans Mono doesn't have an italic
@@ -44,7 +68,7 @@ The bitmap font includes the following unicode range:
 - LATIN EXTENDED-A
 
 This means unicode symbols from `0 .. 0x17f`, hence letters and
-and symbols from a QWERTZ/QWERTY keyboard plus symbols such as
+symbols from a QWERTZ/QWERTY keyboard plus symbols such as
 Ö, Ä, and Ü. Control characters are not included.
 
 # Quick Demo
