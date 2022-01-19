@@ -10,11 +10,14 @@ set -x
 DIR=$(dirname "$(realpath "$0")")
 cd "$DIR" || exit
 
+echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the build, and applies Rustfmt and clippy afterwards."
+
 cd "codegen" || exit
-cargo run --bin codegen
+# Needs rustc 1.58 or above
+cargo +stable run --bin codegen
 cd ..
 
 cargo fmt
-cargo clippy --features all
-cargo doc --features all
-cargo check --features all
+cargo +stable clippy --features all
+cargo +stable doc --features all
+cargo +stable build --features all
