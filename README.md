@@ -22,7 +22,7 @@ and not as a bit, which results in a much nicer result on the screen.
 Legacy (8x8) bitmap fonts usually refer to a font where each symbol is encoded in 8 bytes. The ones in a byte
 (`0b00110000`) means "pixel on" and the zeroes' means "pixel off". However, my bitmap font actually encodes the
 intensity of each pixel as a byte from 0 to 255. Hence, this is less size efficient than legacy bitmap fonts,
-but looks much better. Hence, I still use the term bitmap font, because that term is used and known when talking
+but looks much better. I still use the term bitmap font, because that term is used and known when talking
 about pre-rasterized fonts/font rendering in an early stage of the boot process.
 
 ## When To Use This Crate
