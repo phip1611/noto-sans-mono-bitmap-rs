@@ -1,3 +1,6 @@
+# v0.1.3 (2022-01-20)
+- added 'no_std' category in Cargo.toml
+
 # v0.1.2 (2022-01-19)
 - minor documentation improvements
 
