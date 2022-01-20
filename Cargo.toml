@@ -7,7 +7,7 @@ Contains the "Noto Sans Mono" font as pre-rasterized bitmap font in different si
 font weights. This crate is `no_std` and needs no allocations or floating point operations.
 Useful in kernels and bootloaders when only "soft-float" is available.
 """
-version = "0.1.3"
+version = "0.1.4"
 edition = "2018"
 keywords = ["bitmap", "font", "noto-sans-mono"]
 categories = ["text-processing", "no-std"]
