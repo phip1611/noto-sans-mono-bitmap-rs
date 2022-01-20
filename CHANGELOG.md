@@ -1,3 +1,7 @@
+# v0.1.5 (2022-01-20)
+- clearer terminology and doc
+- explains that "bitmap" font is not 100% correct (see section Terminology in README)
+
 # v0.1.4 (2022-01-20)
 - fixed doc
 

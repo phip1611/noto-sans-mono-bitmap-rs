@@ -20,7 +20,7 @@ fn main() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
-                let rgb_32 = 0 << 24 | r << 16 | g << 8 | b;
+                let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
 
                 let index = char_i * bitmap_char.width() + col_i + row_i * buffer_width;
 
