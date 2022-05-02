@@ -1,65 +1,87 @@
 name: Build
 
 on:
-    push:
-        branches: [ main ]
-    pull_request:
-        branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
-    CARGO_TERM_COLOR: always
+  CARGO_TERM_COLOR: always
 
 jobs:
-    # this only tests the generated project that was checked in but not the
-    # codegen project itself
-    build:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                rust:
-                    - stable
-                    - nightly
-                    - 1.56.1 # MSVR
-        steps:
-            -   uses: actions/checkout@v2
-            -   run: sudo apt update && sudo apt install libxkbcommon-dev -y
-            -   name: Build
-                run: cargo build --verbose
-                # the library itself has no tests but the codegen project has tests
-                # so effectively, this is useless
-            -   name: Run tests
-                run: cargo test
+  # this only tests the generated project that was checked in but not the
+  # codegen project itself
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - 1.56.1 # MSVR
+    steps:
+      - uses: actions/checkout@v2
+      # Important preparation step: override the latest default Rust version in GitHub CI
+      # with the current value of the iteration in the "strategy.matrix.rust"-array.
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - run: sudo apt update && sudo apt install libxkbcommon-dev -y
+      - name: Build
+        run: cargo build --verbose
+        # the library itself has no tests but the codegen project has tests
+        # so effectively, this is useless
+      - name: Run tests
+        run: cargo test
 
-    # this only tests the generated project that was checked in but not the
-    # codegen project itself
-    build_no_std:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                rust:
-                    - stable
-                    - nightly
-                    - 1.56.1 # MSVR
-        steps:
-            -   uses: actions/checkout@v2
-            -   name: "Rustup: install some no_std target"
-                run: rustup target add thumbv7em-none-eabihf
-            -   name: Build (no_std)
-                run: cargo build --target thumbv7em-none-eabihf
+  # this only tests the generated project that was checked in but not the
+  # codegen project itself
+  build_no_std:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - 1.56.1 # MSVR
+    steps:
+      - uses: actions/checkout@v2
+      # Important preparation step: override the latest default Rust version in GitHub CI
+      # with the current value of the iteration in the "strategy.matrix.rust"-array.
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: ${{ matrix.rust }}
+          override: true
+      # helps to identify if the right cargo version is actually used
+      - name: "Rustup: install some no_std target"
+        run: rustup target add thumbv7em-none-eabihf
+      - name: Build (no_std)
+        run: cargo build --target thumbv7em-none-eabihf
 
-    # this only tests the generated project that was checked in but not the
-    # codegen project itself
-    style_checks:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                rust:
-                    - stable
-        steps:
-            -   uses: actions/checkout@v2
-            -   name: Rustfmt
-                run: cargo fmt -- --check
-            -   name: Clippy
-                run: cargo clippy
-            -   name: Rustdoc
-                run: cargo doc
+  # this only tests the generated project that was checked in but not the
+  # codegen project itself
+  style_checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+    steps:
+      - uses: actions/checkout@v2
+      # Important preparation step: override the latest default Rust version in GitHub CI
+      # with the current value of the iteration in the "strategy.matrix.rust"-array.
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: Rustfmt
+        run: cargo fmt -- --check
+      - name: Clippy
+        run: cargo clippy
+      - name: Rustdoc
+        run: cargo doc
