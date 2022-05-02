@@ -10,6 +10,8 @@ env:
     CARGO_TERM_COLOR: always
 
 jobs:
+    # this only tests the generated project that was checked in but not the
+    # codegen project itself
     build:
         runs-on: ubuntu-latest
         strategy:
@@ -24,9 +26,29 @@ jobs:
             -   name: Build
                 run: cargo build --verbose
                 # the library itself has no tests but the codegen project has tests
+                # so effectively, this is useless
             -   name: Run tests
                 run: cargo test
 
+    # this only tests the generated project that was checked in but not the
+    # codegen project itself
+    build_no_std:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                rust:
+                    - stable
+                    - nightly
+                    - 1.56.1 # MSVR
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: "Rustup: install some no_std target"
+                run: rustup target add thumbv7em-none-eabihf
+            -   name: Build (no_std)
+                run: cargo build --target thumbv7em-none-eabihf
+
+    # this only tests the generated project that was checked in but not the
+    # codegen project itself
     style_checks:
         runs-on: ubuntu-latest
         strategy:
