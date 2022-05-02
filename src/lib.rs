@@ -13,6 +13,7 @@
 //! * ✅ nice anti-aliasing/smoothing and better looking than legacy bitmap fonts
 //! * ✅ every pixel is encoded in a byte (0-255) and not a bit, which results in a much nicer result on the screen.
 //! * ✅ relevant font sizes, such as 14, 16, 24, 32, and 64px (as optional build time features)
+//! * ✅ zero dependencies
 //!
 //! ## Terminology: Is Bitmap Font The Right Term?
 //! Legacy (8x8) bitmap fonts usually refer to a font where each symbol is encoded in 8 bytes. The ones in a byte

@@ -15,6 +15,7 @@ and not as a bit, which results in a much nicer result on the screen.
 * ✅ nice anti-aliasing/smoothing and better looking than legacy bitmap fonts
 * ✅ every pixel is encoded in a byte (0-255) and not a bit, which results in a much nicer result on the screen.
 * ✅ relevant font sizes: 14, 16, 24, 32, and 64px (as optional build time features)
+* ✅ zero dependencies
 
 ![Screenshot of the bitmap font.](screenshot_bitmap_font.png "Screenshot of the bitmap font.")
 
