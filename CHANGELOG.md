@@ -1,3 +1,6 @@
+# v0.1.6 (2022-09-01)
+- add the "■" character (U+25A0; [Geometric Shapes](https://jrgraphix.net/r/Unicode/25A0-25FF))
+
 # v0.1.5 (2022-01-20)
 - clearer terminology and doc
 - explains that "bitmap" font is not 100% correct (see section Terminology in README)
