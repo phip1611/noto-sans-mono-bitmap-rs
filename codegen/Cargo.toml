@@ -18,6 +18,6 @@ codegen-units = 1
 opt-level = 1
 
 [dependencies]
-fontdue = "0.7.2"
+fontdue = { version = "0.7.2", features = ["parallel", "simd"] }
 minifb = "0.23.0"
 

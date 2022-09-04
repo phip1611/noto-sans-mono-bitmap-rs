@@ -1,4 +1,4 @@
-use crate::unicode::UnicodeIter;
+use crate::SUPPORTED_UNICODE_RANGES;
 use fontdue::{Font, FontSettings};
 
 const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.ttf");
@@ -7,32 +7,62 @@ const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf")
 
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
+    // must match order in enum FontWeightName
     NOTO_SANS_MONO_LIGHT,
     NOTO_SANS_MONO_REGULAR,
     NOTO_SANS_MONO_BOLD,
 ];
 
 pub const fn noto_font_by_weight(typ: &FontWeight) -> &'static [u8] {
-    NOTO_SANS_FAMILY[typ.val()]
+    NOTO_SANS_FAMILY[typ.name.val()]
 }
 
-/// This is a partially a copy from the code in `codegen_templates/lib.rs.template.txt`
-/// or a template for it.
-/// Supported font weights.
+/// Font weights that the codegen process generates.
+pub const SUPPORTED_FONT_WEIGHTS: &[FontWeight] = &[
+    FontWeight::new(FontWeightName::Light, false),
+    FontWeight::new(FontWeightName::Regular, true),
+    FontWeight::new(FontWeightName::Bold, false),
+];
+
+/// Supported font weights for the code generation. Corresponds to the available TTF font files.
+#[derive(Debug, Copy, Clone)]
+pub struct FontWeight {
+    name: FontWeightName,
+    // if the feature is included by default in Cargo.toml
+    default_feature: bool,
+}
+
+impl FontWeight {
+    pub const fn new(name: FontWeightName, default_feature: bool) -> Self {
+        Self {
+            name,
+            default_feature,
+        }
+    }
+
+    pub fn name(&self) -> &FontWeightName {
+        &self.name
+    }
+
+    pub fn mod_name(&self) -> &str {
+        self.name.mod_name()
+    }
+
+    pub fn default_feature(&self) -> bool {
+        self.default_feature
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 #[repr(usize)]
-pub enum FontWeight {
+pub enum FontWeightName {
+    // must match order in array NOTO_SANS_FAMILY
     Light,
     Regular,
     Bold,
 }
 
-impl FontWeight {
-    /// Returns a slice to iterate over all available font weights.
-    pub const fn variants() -> &'static [Self] {
-        &[Self::Light, Self::Regular, Self::Bold]
-    }
-
+impl FontWeightName {
     /// Returns the numeric value of the enum variant.
     pub const fn val(self) -> usize {
         self as _
@@ -41,9 +71,9 @@ impl FontWeight {
     /// Returns a lowercase string describing the font weight.
     pub const fn mod_name(self) -> &'static str {
         match self {
-            FontWeight::Light => "light",
-            FontWeight::Regular => "regular",
-            FontWeight::Bold => "bold",
+            Self::Light => "light",
+            Self::Regular => "regular",
+            Self::Bold => "bold",
         }
     }
 }
@@ -168,10 +198,12 @@ impl ToBitmapFont {
     /// bitmap can be reduced to HEIGHT x WIDTH instead of HEIGHT x HEIGHT, which
     /// would indicate a big space between all letters.
     fn find_max_width(font: &Font, font_size: f32) -> usize {
-        UnicodeIter::new()
-            .filter(|x| x.is_visible_char())
+        SUPPORTED_UNICODE_RANGES
+            .iter()
+            .flat_map(|range| range.iter())
+            .filter(|symbol| symbol.is_visible_char())
             .map(|s| s.get_char())
-            .map(|c| font.rasterize(c, font_size).0.width)
+            .map(|c| (c, font.rasterize(c, font_size).0.width))
             .max()
             .unwrap()
     }

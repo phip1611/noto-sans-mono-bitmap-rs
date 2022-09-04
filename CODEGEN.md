@@ -3,8 +3,9 @@ Most changes should be done in the template files there instead of
 in the main crate.
 
 This is my first ever codegen-like experience with Rust. The code is far
-from optimal but good enough.
+from optimal but good enough... actually, I want to publicly apologize for
+that code crime :D but it works.
 
 ## Build Prerequisites
-Because the examples uses "minifb" as dependency, on Linux the package `libxkbcommon-dev` is required
-to run them. This is not necessary, if you just use this crate as dependency.
+Because the examples uses "minifb" as dependency, on Linux the package `libxkbcommon-dev` is
+required to run them. This is not necessary, if you just use this crate as dependency.

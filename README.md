@@ -1,11 +1,14 @@
 # noto-sans-mono-bitmap (Rust library)
 
-Pre-rasterized bitmap font from "Noto Sans Mono", an open font from Google.
+Provides pre-rasterized characters from the "Noto Sans Mono" font in different sizes and font
+weights for multiple unicode ranges. This crate is `no_std` and needs no allocations or floating
+point operations. Useful in kernels and bootloaders when only "soft-float" is available. Strictly
+speaking, this crate is more than a basic bitmap font, because it encodes each pixel as a byte
+and not as a bit, which results in a much nicer result on the screen.
+
 * Original font files taken from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
 * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
-Strictly speaking, this crate is more than a basic bitmap font, because it encodes each pixel as a byte
-and not as a bit, which results in a much nicer result on the screen.
 
 ## TL;DR
 * ✅ `no_std`, zero allocations, no floating point operations

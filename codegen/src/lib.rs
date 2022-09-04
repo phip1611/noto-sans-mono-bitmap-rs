@@ -20,43 +20,55 @@
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
 
+pub use crate::unicode::SUPPORTED_UNICODE_RANGES;
+
+pub mod bytes_outsourcer;
 pub mod font;
 pub mod unicode;
 
-/// The height of the bitmap for the font rasterization.
-/// The width will be a little bit less. Furthermore, the
-/// font size is also less than the bitmap height, because
-/// there will be a small vertical padding to the top and
-/// the bottom for proper alignment of characters.
+// All supported raster heights that will be generated.
+pub const SUPPORTED_RASTER_HEIGHTS: &[RasterHeight] = &[
+    RasterHeight::new(14, true),
+    RasterHeight::new(16, false),
+    RasterHeight::new(18, false),
+    RasterHeight::new(20, false),
+    RasterHeight::new(22, false),
+    RasterHeight::new(24, false),
+    RasterHeight::new(32, false),
+    RasterHeight::new(64, false),
+];
+
+/// Teight of the rasterization process of certain characters. Like the font
+/// size but this describes the size of the outer box. Hence, the font size
+/// is a little smaller.
+///
+/// The width of each character is influenced by this property. It will be a
+/// little less as well
 #[derive(Debug, Clone, Copy)]
-#[repr(usize)]
-pub enum BitmapHeight {
-    Size14 = 14,
-    Size16 = 16,
-    Size18 = 18,
-    Size20 = 20,
-    Size22 = 22,
-    Size24 = 24,
-    Size32 = 32,
-    Size64 = 64,
+pub struct RasterHeight {
+    value: u32,
+    // if the feature is included by default in Cargo.toml
+    default_feature: bool,
 }
 
-impl BitmapHeight {
-    pub const fn val(self) -> usize {
-        self as _
+impl RasterHeight {
+    const fn new(value: u32, default_feature: bool) -> Self {
+        Self {
+            value,
+            default_feature,
+        }
     }
 
-    pub const fn variants() -> &'static [Self] {
-        &[
-            Self::Size14,
-            Self::Size16,
-            Self::Size18,
-            Self::Size20,
-            Self::Size22,
-            Self::Size24,
-            Self::Size32,
-            Self::Size64,
-        ]
+    pub const fn value(self) -> u32 {
+        self.value
+    }
+
+    pub fn feature_name(&self) -> String {
+        format!("size_{}", self.value)
+    }
+
+    pub fn default_feature(&self) -> bool {
+        self.default_feature
     }
 }
 
@@ -71,3 +83,11 @@ pub const CARGO_LIB_RS: &str = include_str!("codegen_templates/lib.rs.template.t
 
 /// Path into the main repository, where the codegen manipulates files.
 pub const CODEGEN_BASE_PATH: &str = "../src/";
+/// Contains the rasterized bytes of all characters.
+pub const CODEGEN_RASTERIZED_BYTES_PATH: &str = "../src/res_rasterized_characters";
+
+/*#[cfg(test)]
+mod tests {
+    use super::*;
+
+}*/
