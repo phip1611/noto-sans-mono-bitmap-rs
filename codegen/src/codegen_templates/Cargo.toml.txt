@@ -45,4 +45,4 @@ default = ["all"]
 
 
 [dev-dependencies]
-minifb = "0.20.0"
+minifb = "0.23.0"
