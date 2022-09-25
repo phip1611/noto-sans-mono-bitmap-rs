@@ -21,6 +21,7 @@ documentation = "https://docs.rs/noto-sans-mono-bitmap"
 
 exclude = [
     ".editorconfig",
+    "check-size",
     "codegen_n_build.sh",
     "CODEGEN.md",
     "examples",
