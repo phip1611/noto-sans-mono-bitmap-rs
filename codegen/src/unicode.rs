@@ -34,7 +34,7 @@ pub struct UnicodeIter {
 impl UnicodeIter {
     /// Inclusive unicode limit. Iterates from 0 to this limit through unicode symbols.
     const LIMIT: u32 = 0x17f;
-    const ADDITIONAL_SYMBOLS: &'static [u32] = &[0x25A0];
+    const ADDITIONAL_SYMBOLS: &'static [u32] = &[0x25A0, 0xFFFD];
 
     pub const fn new() -> Self {
         Self {
