@@ -12,7 +12,7 @@ and not as a bit, which results in a much nicer result on the screen.
 
 ## TL;DR
 * ✅ `no_std`, zero allocations, no floating point operations
-* ✅ most important symbols, numbers, and letters as pre-rasterized bitmap
+* ✅ most important symbols, numbers, and letters as pre-rasterized bitmap. Unicode-ranges are selectable.
 * ✅ Noto Sans Mono font as base
 * ✅ different sizes and font weights (light, normal, bold)
 * ✅ nice anti-aliasing/smoothing and better looking than legacy bitmap fonts
@@ -46,19 +46,20 @@ using my crate.
 
 ## Minimal Code Example
 ```rust
-use noto_sans_mono_bitmap::{get_raster, get_raster_width, RasterHeight, FontWeight};
+use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight};
 
 // Minimal example.
 fn main() {
-    let width = get_raster_width(FontWeight::Regular, RasterHeight::Size16);
+    let width = get_raster_width(FontWeight::Regular, RasterHeight::Size14);
     println!(
         "Each char of the mono-spaced font will be {}px in width if the font \
          weight={:?} and the bitmap height={}",
         width,
         FontWeight::Regular,
-        RasterHeight::Size16.val()
+        RasterHeight::Size14.val()
     );
-    let bitmap_char = get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
+    let bitmap_char =
+        get_raster('A', FontWeight::Regular, RasterHeight::Size14).expect("unsupported char");
     println!("{:?}", bitmap_char);
     for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {
@@ -68,26 +69,19 @@ fn main() {
 }
 ```
 
-## Cargo Build Time Features
-If all Cargo features are available, this bitmap fonts supports `light`, `regular`,
-and `bold`, but no `italic` style, because Noto Sans Mono doesn't have an italic
-TTF file. The rasterization was done with the awesome [fontdue-Crate](https://crates.io/crates/fontdue).
+## Cargo Features and Crate Size
+By default, only a reasonable subset of possible features is included. The raw crate-size is a few
+MiB in size but after compilation and discarding irrelevant parts (i.e., size 14, regular font,
+only ASCII), the overhead should be at less than 120 KiB in binary size, according to my
+measurements. The compiler can reliably discard unused sizes or weights, but not so for unicode
+ranges. Thus, it is recommended to include no more features than necessary.
 
-By default, all sizes and font styles/weights are included via the cargo feature `all`.
-This can be restricted by only using features such as `regular` and `size_14`. Anyhow,
-a test of mine showed, that including all features in a release build only increases the
-file size by a few dozen to a few hundred kilobytes. The Rust compiler is really smart
-throwing out unused parts of the bitmap font, even if they are included as dependency.
-Your binary will not be bloated by a few megabytes, according to my findings.
+With all features included inside the binary, and without any discarding by the compiler, you
+can expect 5 or more MiB of memory requirements. However, this would require the rather unlikely
+case that you use different sizes and font weights simulatnously. etc.
 
-The bitmap font includes the following unicode range:
-- BASIC LATIN,
-- LATIN 1 Supplement
-- LATIN EXTENDED-A
-
-This means unicode symbols from `0 .. 0x17f`, hence letters and
-symbols from a QWERTZ/QWERTY keyboard plus symbols such as
-Ö, Ä, and Ü. Control characters are not included.
+For a full support of all unicode ranges, use an on-the-fly rasterization process instead of this
+crate.
 
 ## Quick Demo
 `$ cargo run --example show_chars_in_window`
@@ -95,6 +89,10 @@ symbols from a QWERTZ/QWERTY keyboard plus symbols such as
 ## Build Prerequisites
 Because the examples uses "minifb" as dependency, on Linux the package `libxkbcommon-dev` is required
 to run them. This is not necessary, if you just use this crate as dependency.
+
+## Trivia
+The rasterization was done with the awesome [fontdue-Crate](https://crates.io/crates/fontdue).
+Thanks to the original author(s)!
 
 ## License
 See LICENSE file in repository.
