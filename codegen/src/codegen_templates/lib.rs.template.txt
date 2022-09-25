@@ -41,19 +41,19 @@
 //!
 //! ## Minimal Code Example
 //! ```rust
-//! use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapHeight, FontWeight};
+//! use noto_sans_mono_bitmap::{get_raster, get_raster_width, RasterHeight, FontWeight};
 //!
 //! // Minimal example.
 //!
-//! let width = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
+//! let width = get_raster_width(FontWeight::Regular, RasterHeight::Size16);
 //! println!(
 //!     "Each char of the mono-spaced font will be {}px in width if the font \
 //!      weight={:?} and the bitmap height={}",
 //!     width,
 //!     FontWeight::Regular,
-//!     BitmapHeight::Size16.val()
+//!     RasterHeight::Size16.val()
 //! );
-//! let bitmap_char = get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16).expect("unsupported char");
+//! let bitmap_char = get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
 //! println!("{:?}", bitmap_char);
 //! for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
 //!     for (col_i, pixel) in row.iter().enumerate() {
@@ -176,11 +176,11 @@ impl FontWeight {
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
-pub enum BitmapHeight {
+pub enum RasterHeight {
     // %CODEGEN_BITMAP_SIZE_ENUM_VARIANTS%
 }
 
-impl BitmapHeight {
+impl RasterHeight {
     /// Returns the numeric value of the variant.
     #[inline]
     pub const fn val(self) -> usize {
@@ -188,34 +188,34 @@ impl BitmapHeight {
     }
 }
 
-/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`BitmapHeight`].
+/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`RasterHeight`].
 ///
 /// Returns None, if the given char is not known by the bitmap font. In this case,
-/// you could fall back to `get_bitmap(' ', ...)`.
+/// you could fall back to `get_raster(' ', ...)`.
 ///
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
-pub fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> Option<BitmapChar> {
+pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<BitmapChar> {
     let bitmap = match style {
-// %CODEGEN_GET_BITMAP%
+// %CODEGEN_get_raster%
     };
 
     bitmap.map(|bitmap| BitmapChar {
         bitmap,
         height: size.val(),
-        width: get_bitmap_width(style, size),
+        width: get_raster_width(style, size),
     })
 }
 
 /// Returns the width in pixels a char will occupy on the screen. The width is constant for all
-/// characters regarding the same combination of [`FontWeight`] and [`BitmapHeight`]. The width is
+/// characters regarding the same combination of [`FontWeight`] and [`RasterHeight`]. The width is
 /// a few percent smaller than the height of each char
 ///
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
-pub const fn get_bitmap_width(style: FontWeight, size: BitmapHeight) -> usize {
+pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
-// %CODEGEN_GET_BITMAP_WIDTH%
+// %CODEGEN_get_raster_WIDTH%
     }
 }
 

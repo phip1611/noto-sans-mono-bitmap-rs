@@ -41,19 +41,19 @@
 //!
 //! ## Minimal Code Example
 //! ```rust
-//! use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapHeight, FontWeight};
+//! use noto_sans_mono_bitmap::{get_raster, get_raster_width, RasterHeight, FontWeight};
 //!
 //! // Minimal example.
 //!
-//! let width = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
+//! let width = get_raster_width(FontWeight::Regular, RasterHeight::Size16);
 //! println!(
 //!     "Each char of the mono-spaced font will be {}px in width if the font \
 //!      weight={:?} and the bitmap height={}",
 //!     width,
 //!     FontWeight::Regular,
-//!     BitmapHeight::Size16.val()
+//!     RasterHeight::Size16.val()
 //! );
-//! let bitmap_char = get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16).expect("unsupported char");
+//! let bitmap_char = get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
 //! println!("{:?}", bitmap_char);
 //! for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
 //!     for (col_i, pixel) in row.iter().enumerate() {
@@ -183,7 +183,7 @@ impl FontWeight {
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
-pub enum BitmapHeight {
+pub enum RasterHeight {
     #[cfg(feature = "size_14")]
     Size14 = 14,
     #[cfg(feature = "size_16")]
@@ -202,7 +202,7 @@ pub enum BitmapHeight {
     Size64 = 64,
 }
 
-impl BitmapHeight {
+impl RasterHeight {
     /// Returns the numeric value of the variant.
     #[inline]
     pub const fn val(self) -> usize {
@@ -210,145 +210,145 @@ impl BitmapHeight {
     }
 }
 
-/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`BitmapHeight`].
+/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`RasterHeight`].
 ///
 /// Returns None, if the given char is not known by the bitmap font. In this case,
-/// you could fall back to `get_bitmap(' ', ...)`.
+/// you could fall back to `get_raster(' ', ...)`.
 ///
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
-pub fn get_bitmap(c: char, style: FontWeight, size: BitmapHeight) -> Option<BitmapChar> {
+pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<BitmapChar> {
     let bitmap = match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::light::size_14::get_char(c),
+            RasterHeight::Size14 => crate::light::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::light::size_16::get_char(c),
+            RasterHeight::Size16 => crate::light::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::light::size_18::get_char(c),
+            RasterHeight::Size18 => crate::light::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::light::size_20::get_char(c),
+            RasterHeight::Size20 => crate::light::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::light::size_22::get_char(c),
+            RasterHeight::Size22 => crate::light::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::light::size_24::get_char(c),
+            RasterHeight::Size24 => crate::light::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::light::size_32::get_char(c),
+            RasterHeight::Size32 => crate::light::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::light::size_64::get_char(c),
+            RasterHeight::Size64 => crate::light::size_64::get_char(c),
         },
         #[cfg(feature = "regular")]
         FontWeight::Regular => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::regular::size_14::get_char(c),
+            RasterHeight::Size14 => crate::regular::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::regular::size_16::get_char(c),
+            RasterHeight::Size16 => crate::regular::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::regular::size_18::get_char(c),
+            RasterHeight::Size18 => crate::regular::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::regular::size_20::get_char(c),
+            RasterHeight::Size20 => crate::regular::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::regular::size_22::get_char(c),
+            RasterHeight::Size22 => crate::regular::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::regular::size_24::get_char(c),
+            RasterHeight::Size24 => crate::regular::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::regular::size_32::get_char(c),
+            RasterHeight::Size32 => crate::regular::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::regular::size_64::get_char(c),
+            RasterHeight::Size64 => crate::regular::size_64::get_char(c),
         },
         #[cfg(feature = "bold")]
         FontWeight::Bold => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::bold::size_14::get_char(c),
+            RasterHeight::Size14 => crate::bold::size_14::get_char(c),
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::bold::size_16::get_char(c),
+            RasterHeight::Size16 => crate::bold::size_16::get_char(c),
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::bold::size_18::get_char(c),
+            RasterHeight::Size18 => crate::bold::size_18::get_char(c),
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::bold::size_20::get_char(c),
+            RasterHeight::Size20 => crate::bold::size_20::get_char(c),
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::bold::size_22::get_char(c),
+            RasterHeight::Size22 => crate::bold::size_22::get_char(c),
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::bold::size_24::get_char(c),
+            RasterHeight::Size24 => crate::bold::size_24::get_char(c),
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::bold::size_32::get_char(c),
+            RasterHeight::Size32 => crate::bold::size_32::get_char(c),
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::bold::size_64::get_char(c),
+            RasterHeight::Size64 => crate::bold::size_64::get_char(c),
         },
     };
 
     bitmap.map(|bitmap| BitmapChar {
         bitmap,
         height: size.val(),
-        width: get_bitmap_width(style, size),
+        width: get_raster_width(style, size),
     })
 }
 
 /// Returns the width in pixels a char will occupy on the screen. The width is constant for all
-/// characters regarding the same combination of [`FontWeight`] and [`BitmapHeight`]. The width is
+/// characters regarding the same combination of [`FontWeight`] and [`RasterHeight`]. The width is
 /// a few percent smaller than the height of each char
 ///
 /// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
-pub const fn get_bitmap_width(style: FontWeight, size: BitmapHeight) -> usize {
+pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::light::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::light::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::light::size_16::BITMAP_WIDTH,
+            RasterHeight::Size16 => crate::light::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::light::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::light::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::light::size_20::BITMAP_WIDTH,
+            RasterHeight::Size20 => crate::light::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::light::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::light::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::light::size_24::BITMAP_WIDTH,
+            RasterHeight::Size24 => crate::light::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::light::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::light::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::light::size_64::BITMAP_WIDTH,
+            RasterHeight::Size64 => crate::light::size_64::BITMAP_WIDTH,
         },
         #[cfg(feature = "regular")]
         FontWeight::Regular => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::regular::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::regular::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::regular::size_16::BITMAP_WIDTH,
+            RasterHeight::Size16 => crate::regular::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::regular::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::regular::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::regular::size_20::BITMAP_WIDTH,
+            RasterHeight::Size20 => crate::regular::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::regular::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::regular::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::regular::size_24::BITMAP_WIDTH,
+            RasterHeight::Size24 => crate::regular::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::regular::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::regular::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::regular::size_64::BITMAP_WIDTH,
+            RasterHeight::Size64 => crate::regular::size_64::BITMAP_WIDTH,
         },
         #[cfg(feature = "bold")]
         FontWeight::Bold => match size {
             #[cfg(feature = "size_14")]
-            BitmapHeight::Size14 => crate::bold::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::bold::size_14::BITMAP_WIDTH,
             #[cfg(feature = "size_16")]
-            BitmapHeight::Size16 => crate::bold::size_16::BITMAP_WIDTH,
+            RasterHeight::Size16 => crate::bold::size_16::BITMAP_WIDTH,
             #[cfg(feature = "size_18")]
-            BitmapHeight::Size18 => crate::bold::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::bold::size_18::BITMAP_WIDTH,
             #[cfg(feature = "size_20")]
-            BitmapHeight::Size20 => crate::bold::size_20::BITMAP_WIDTH,
+            RasterHeight::Size20 => crate::bold::size_20::BITMAP_WIDTH,
             #[cfg(feature = "size_22")]
-            BitmapHeight::Size22 => crate::bold::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::bold::size_22::BITMAP_WIDTH,
             #[cfg(feature = "size_24")]
-            BitmapHeight::Size24 => crate::bold::size_24::BITMAP_WIDTH,
+            RasterHeight::Size24 => crate::bold::size_24::BITMAP_WIDTH,
             #[cfg(feature = "size_32")]
-            BitmapHeight::Size32 => crate::bold::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::bold::size_32::BITMAP_WIDTH,
             #[cfg(feature = "size_64")]
-            BitmapHeight::Size64 => crate::bold::size_64::BITMAP_WIDTH,
+            RasterHeight::Size64 => crate::bold::size_64::BITMAP_WIDTH,
         },
     }
 }

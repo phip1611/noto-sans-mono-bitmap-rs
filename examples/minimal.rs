@@ -1,17 +1,17 @@
-use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapHeight, FontWeight};
+use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight};
 
 // Minimal example.
 fn main() {
-    let width = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
+    let width = get_raster_width(FontWeight::Regular, RasterHeight::Size16);
     println!(
         "Each char of the mono-spaced font will be {}px in width if the font \
          weight={:?} and the bitmap height={}",
         width,
         FontWeight::Regular,
-        BitmapHeight::Size16.val()
+        RasterHeight::Size16.val()
     );
     let bitmap_char =
-        get_bitmap('A', FontWeight::Regular, BitmapHeight::Size16).expect("unknown char");
+        get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unknown char");
     println!("{:?}", bitmap_char);
     for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {

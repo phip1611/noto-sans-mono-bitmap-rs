@@ -31,8 +31,8 @@ exclude = [
 [features]
 # My testing showed that rustc reliably discards unused raster heights or font weights.
 # However, to speed-up compilation, it's recommended to only use the default features
-# and not include all all the time. Note that rustc can not easily discard unused unicode
-# ranges if the input source theoretically allows the full u32-range.
+# and not include all of them all the time. Note that rustc can not easily discard unused
+# unicode ranges if the input source theoretically allows the full u32-range.
 default = ["raster_heights_default", "font_weights_default", "unicode_ranges_default"]
 
 # Feature that enables the full variety of raster heights, font weights, and unicode ranges.

@@ -1,5 +1,5 @@
 use minifb::{Key, Window, WindowOptions};
-use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapHeight, FontWeight};
+use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight};
 
 // Example that prints the chars in var "msg" to the screen using
 // the pre-rendered bitmap font.
@@ -7,15 +7,15 @@ fn main() {
     // letters we want to print
     let msg = "Abc äöü!";
     let font_weight = FontWeight::Light;
-    let bitmap_height = BitmapHeight::Size64;
+    let bitmap_height = RasterHeight::Size64;
     let buffer_height = bitmap_height.val();
-    let char_width = get_bitmap_width(font_weight, bitmap_height);
+    let char_width = get_raster_width(font_weight, bitmap_height);
     let buffer_width = char_width * msg.chars().count();
     let mut draw_buffer = vec![0; buffer_height * buffer_width];
 
     // rasterize each char and draw it into the framebuffer
     for (char_i, char) in msg.chars().enumerate() {
-        let bitmap_char = get_bitmap(char, font_weight, bitmap_height).expect("unknown char");
+        let bitmap_char = get_raster(char, font_weight, bitmap_height).expect("unknown char");
         for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);

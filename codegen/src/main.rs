@@ -229,75 +229,75 @@ fn codegen_lib_rs() {
         });
     }
 
-    // codegen get_bitmap match
-    let mut get_bitmap_match = String::new();
+    // codegen get_raster match
+    let mut get_raster_match = String::new();
     {
         SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
             writeln!(
-                &mut get_bitmap_match,
+                &mut get_raster_match,
                 "        #[cfg(feature = \"{}\")]",
                 w.mod_name()
             )
             .unwrap();
             writeln!(
-                &mut get_bitmap_match,
+                &mut get_raster_match,
                 "        FontWeight::{:?} => match size {{",
                 w.name()
             )
             .unwrap();
             SUPPORTED_RASTER_HEIGHTS.iter().for_each(|size| {
                 writeln!(
-                    &mut get_bitmap_match,
+                    &mut get_raster_match,
                     "            #[cfg(feature = \"{}\")]",
                     size.feature_name()
                 )
                 .unwrap();
                 writeln!(
-                    &mut get_bitmap_match,
-                    "            BitmapHeight::Size{:?} => crate::{}::size_{}::get_char(c),",
+                    &mut get_raster_match,
+                    "            RasterHeight::Size{:?} => crate::{}::size_{}::get_char(c),",
                     size.value(),
                     w.mod_name(),
                     size.value()
                 )
                 .unwrap();
             });
-            writeln!(&mut get_bitmap_match, "        }}").unwrap();
+            writeln!(&mut get_raster_match, "        }}").unwrap();
         });
     }
 
-    // codegen get_bitmap_width match
-    let mut get_bitmap_width_match = String::new();
+    // codegen get_raster_width match
+    let mut get_raster_width_match = String::new();
     {
         SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
             writeln!(
-                &mut get_bitmap_width_match,
+                &mut get_raster_width_match,
                 "        #[cfg(feature = \"{}\")]",
                 w.mod_name()
             )
             .unwrap();
             writeln!(
-                &mut get_bitmap_width_match,
+                &mut get_raster_width_match,
                 "        FontWeight::{:?} => match size {{",
                 w.name()
             )
             .unwrap();
             SUPPORTED_RASTER_HEIGHTS.iter().for_each(|size| {
                 writeln!(
-                    &mut get_bitmap_width_match,
+                    &mut get_raster_width_match,
                     "            #[cfg(feature = \"{}\")]",
                     size.feature_name()
                 )
                 .unwrap();
                 writeln!(
-                    &mut get_bitmap_width_match,
-                    "            BitmapHeight::Size{} => crate::{}::size_{}::BITMAP_WIDTH,",
+                    &mut get_raster_width_match,
+                    "            RasterHeight::Size{} => crate::{}::size_{}::BITMAP_WIDTH,",
                     size.value(),
                     w.mod_name(),
                     size.value()
                 )
                 .unwrap();
             });
-            writeln!(&mut get_bitmap_width_match, "        }}").unwrap();
+            writeln!(&mut get_raster_width_match, "        }}").unwrap();
         });
     }
 
@@ -316,10 +316,10 @@ fn codegen_lib_rs() {
                     "// %CODEGEN_BITMAP_SIZE_ENUM_VARIANTS%",
                     font_size_enum_variants.as_str()
                 )
-                .replace("// %CODEGEN_GET_BITMAP%", get_bitmap_match.as_str())
+                .replace("// %CODEGEN_get_raster%", get_raster_match.as_str())
                 .replace(
-                    "// %CODEGEN_GET_BITMAP_WIDTH%",
-                    get_bitmap_width_match.as_str()
+                    "// %CODEGEN_get_raster_WIDTH%",
+                    get_raster_width_match.as_str()
                 )
         )
         .unwrap();
