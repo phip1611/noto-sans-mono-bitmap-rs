@@ -14,10 +14,13 @@ echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the buil
 
 cd "codegen" || exit
 # Needs rustc 1.58 or above
-cargo +stable run --release --bin codegen
+cargo test
+RUSTFLAGS="-C target-cpu=native" cargo run --release --bin codegen
 cd ..
 
 cargo fmt
-cargo +stable clippy --features all  --all-targets
-cargo +stable doc --features all
-cargo +stable build --features all --all-targets
+# don't use "--all-targets" here; seems like it tests all other targets and not the lib
+cargo test --features all
+cargo clippy --features all  --all-targets
+cargo doc --features all
+cargo build --features all --all-targets
