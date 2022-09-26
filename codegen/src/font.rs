@@ -108,10 +108,19 @@ macro_rules! trim_index_to_bounds {
 /// be XxX, as long as each character has the same width.
 #[derive(Debug)]
 pub struct ToBitmapFont {
+    /// See [`Font`].
     font: Font,
+    /// Height of the raster for the font rasterization.
     bitmap_height: usize,
+    /// Width of each letter for the font rasterization.
+    /// This width ensures that the font is indeed a mono-space font.
     bitmap_width: usize,
+    /// This is a little lower value than the height and is required to place the
+    /// letter inside the box without clipping at the top or at the bottom.
     font_size: f32,
+    /// The widest char/symbol after rasterization. Interesting as debug information which
+    /// letter is the widest. Helps me to streamling the width for the centering of all letters.
+    widest_char: char,
 }
 
 impl ToBitmapFont {
@@ -137,13 +146,14 @@ impl ToBitmapFont {
         )
         .unwrap();
 
-        let bitmap_width = Self::find_max_width(&font, font_size);
+        let (widest_char, bitmap_width) = Self::find_max_width(&font, font_size);
 
         Self {
             font,
             bitmap_height,
             bitmap_width,
             font_size,
+            widest_char,
         }
     }
 
@@ -197,14 +207,16 @@ impl ToBitmapFont {
     /// char will have for the given font size. This way, the width of the final
     /// bitmap can be reduced to HEIGHT x WIDTH instead of HEIGHT x HEIGHT, which
     /// would indicate a big space between all letters.
-    fn find_max_width(font: &Font, font_size: f32) -> usize {
+    fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
         SUPPORTED_UNICODE_RANGES
             .iter()
             .flat_map(|range| range.iter())
             .filter(|symbol| symbol.is_visible_char())
             .map(|s| s.get_char())
+            // return tuple of char and rasterized width
             .map(|c| (c, font.rasterize(c, font_size).0.width))
-            .max()
+            // look for maximum by width
+            .max_by(|(_, l_width), (_, r_width)| l_width.cmp(r_width))
             .unwrap()
     }
 
@@ -216,6 +228,10 @@ impl ToBitmapFont {
     }
     pub const fn font_size(&self) -> f32 {
         self.font_size
+    }
+
+    pub const fn widest_char(&self) -> char {
+        self.widest_char
     }
 }
 

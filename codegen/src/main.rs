@@ -35,6 +35,12 @@ fn main() {
     // so that I can `include!` the Rust definitions for the rasterized characters.
     let mut bytes_outsourcer = BytesToFileOutsourcer::new(CODEGEN_RASTERIZED_BYTES_PATH);
 
+    // debugging info
+    {
+        let font = ToBitmapFont::new(20 as usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
+        println!("INFO: The widest char is '{}'", font.widest_char());
+    }
+
     // create the font weight modules for each supported font weight.
     for weight in SUPPORTED_FONT_WEIGHTS {
         let font_bytes = noto_font_by_weight(weight);
