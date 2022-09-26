@@ -14,8 +14,6 @@ pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
         end: 0xff,
         default_feature: false,
     },
-    /* I'll might add more later step by step when I exactly trace their effect on the whole
-       crate size.
     // ĈĻŜ
     UnicodeRange {
         feature_name: "unicode-latin-extended-a",
@@ -23,6 +21,8 @@ pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
         end: 0x17f,
         default_feature: false,
     },
+    // careful: adding more results in much more file size
+    /*
     UnicodeRange {
         feature_name: "unicode-latin-extended-b",
         begin: 0x180,

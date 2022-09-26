@@ -14,7 +14,7 @@ pub const RASTER_HEIGHT: usize = 32;
 /// The width of each rasterized character for the given font weight and
 /// size. This is a few percent less than [`RASTER_HEIGHT`], as the letters
 /// need to be close together to "look normal", i.e., no horizontal padding.
-pub const RASTER_WIDTH: usize = 16;
+pub const RASTER_WIDTH: usize = 19;
 
 /// Returns the raster of the given character for font weight bold and font size 27px
 #[inline]
@@ -590,6 +590,390 @@ pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
         // letter: 'ÿ' / 0xff
         #[cfg(feature = "unicode-latin-1-supplement")]
         'ÿ' => Some(include!("../res_rasterized_characters/0xff_h32_wBold.txt")),
+        // letter: 'Ā' / 0x100
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ā' => Some(include!("../res_rasterized_characters/0x100_h32_wBold.txt")),
+        // letter: 'ā' / 0x101
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ā' => Some(include!("../res_rasterized_characters/0x101_h32_wBold.txt")),
+        // letter: 'Ă' / 0x102
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ă' => Some(include!("../res_rasterized_characters/0x102_h32_wBold.txt")),
+        // letter: 'ă' / 0x103
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ă' => Some(include!("../res_rasterized_characters/0x103_h32_wBold.txt")),
+        // letter: 'Ą' / 0x104
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ą' => Some(include!("../res_rasterized_characters/0x104_h32_wBold.txt")),
+        // letter: 'ą' / 0x105
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ą' => Some(include!("../res_rasterized_characters/0x105_h32_wBold.txt")),
+        // letter: 'Ć' / 0x106
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ć' => Some(include!("../res_rasterized_characters/0x106_h32_wBold.txt")),
+        // letter: 'ć' / 0x107
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ć' => Some(include!("../res_rasterized_characters/0x107_h32_wBold.txt")),
+        // letter: 'Ĉ' / 0x108
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĉ' => Some(include!("../res_rasterized_characters/0x108_h32_wBold.txt")),
+        // letter: 'ĉ' / 0x109
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĉ' => Some(include!("../res_rasterized_characters/0x109_h32_wBold.txt")),
+        // letter: 'Ċ' / 0x10a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ċ' => Some(include!("../res_rasterized_characters/0x10a_h32_wBold.txt")),
+        // letter: 'ċ' / 0x10b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ċ' => Some(include!("../res_rasterized_characters/0x10b_h32_wBold.txt")),
+        // letter: 'Č' / 0x10c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Č' => Some(include!("../res_rasterized_characters/0x10c_h32_wBold.txt")),
+        // letter: 'č' / 0x10d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'č' => Some(include!("../res_rasterized_characters/0x10d_h32_wBold.txt")),
+        // letter: 'Ď' / 0x10e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ď' => Some(include!("../res_rasterized_characters/0x10e_h32_wBold.txt")),
+        // letter: 'ď' / 0x10f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ď' => Some(include!("../res_rasterized_characters/0x10f_h32_wBold.txt")),
+        // letter: 'Đ' / 0x110
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Đ' => Some(include!("../res_rasterized_characters/0x110_h32_wBold.txt")),
+        // letter: 'đ' / 0x111
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'đ' => Some(include!("../res_rasterized_characters/0x111_h32_wBold.txt")),
+        // letter: 'Ē' / 0x112
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ē' => Some(include!("../res_rasterized_characters/0x112_h32_wBold.txt")),
+        // letter: 'ē' / 0x113
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ē' => Some(include!("../res_rasterized_characters/0x113_h32_wBold.txt")),
+        // letter: 'Ĕ' / 0x114
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĕ' => Some(include!("../res_rasterized_characters/0x114_h32_wBold.txt")),
+        // letter: 'ĕ' / 0x115
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĕ' => Some(include!("../res_rasterized_characters/0x115_h32_wBold.txt")),
+        // letter: 'Ė' / 0x116
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ė' => Some(include!("../res_rasterized_characters/0x116_h32_wBold.txt")),
+        // letter: 'ė' / 0x117
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ė' => Some(include!("../res_rasterized_characters/0x117_h32_wBold.txt")),
+        // letter: 'Ę' / 0x118
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ę' => Some(include!("../res_rasterized_characters/0x118_h32_wBold.txt")),
+        // letter: 'ę' / 0x119
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ę' => Some(include!("../res_rasterized_characters/0x119_h32_wBold.txt")),
+        // letter: 'Ě' / 0x11a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ě' => Some(include!("../res_rasterized_characters/0x11a_h32_wBold.txt")),
+        // letter: 'ě' / 0x11b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ě' => Some(include!("../res_rasterized_characters/0x11b_h32_wBold.txt")),
+        // letter: 'Ĝ' / 0x11c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĝ' => Some(include!("../res_rasterized_characters/0x11c_h32_wBold.txt")),
+        // letter: 'ĝ' / 0x11d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĝ' => Some(include!("../res_rasterized_characters/0x11d_h32_wBold.txt")),
+        // letter: 'Ğ' / 0x11e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ğ' => Some(include!("../res_rasterized_characters/0x11e_h32_wBold.txt")),
+        // letter: 'ğ' / 0x11f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ğ' => Some(include!("../res_rasterized_characters/0x11f_h32_wBold.txt")),
+        // letter: 'Ġ' / 0x120
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ġ' => Some(include!("../res_rasterized_characters/0x120_h32_wBold.txt")),
+        // letter: 'ġ' / 0x121
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ġ' => Some(include!("../res_rasterized_characters/0x121_h32_wBold.txt")),
+        // letter: 'Ģ' / 0x122
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ģ' => Some(include!("../res_rasterized_characters/0x122_h32_wBold.txt")),
+        // letter: 'ģ' / 0x123
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ģ' => Some(include!("../res_rasterized_characters/0x123_h32_wBold.txt")),
+        // letter: 'Ĥ' / 0x124
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĥ' => Some(include!("../res_rasterized_characters/0x124_h32_wBold.txt")),
+        // letter: 'ĥ' / 0x125
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĥ' => Some(include!("../res_rasterized_characters/0x125_h32_wBold.txt")),
+        // letter: 'Ħ' / 0x126
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ħ' => Some(include!("../res_rasterized_characters/0x126_h32_wBold.txt")),
+        // letter: 'ħ' / 0x127
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ħ' => Some(include!("../res_rasterized_characters/0x127_h32_wBold.txt")),
+        // letter: 'Ĩ' / 0x128
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĩ' => Some(include!("../res_rasterized_characters/0x128_h32_wBold.txt")),
+        // letter: 'ĩ' / 0x129
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĩ' => Some(include!("../res_rasterized_characters/0x129_h32_wBold.txt")),
+        // letter: 'Ī' / 0x12a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ī' => Some(include!("../res_rasterized_characters/0x12a_h32_wBold.txt")),
+        // letter: 'ī' / 0x12b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ī' => Some(include!("../res_rasterized_characters/0x12b_h32_wBold.txt")),
+        // letter: 'Ĭ' / 0x12c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĭ' => Some(include!("../res_rasterized_characters/0x12c_h32_wBold.txt")),
+        // letter: 'ĭ' / 0x12d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĭ' => Some(include!("../res_rasterized_characters/0x12d_h32_wBold.txt")),
+        // letter: 'Į' / 0x12e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Į' => Some(include!("../res_rasterized_characters/0x12e_h32_wBold.txt")),
+        // letter: 'į' / 0x12f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'į' => Some(include!("../res_rasterized_characters/0x12f_h32_wBold.txt")),
+        // letter: 'İ' / 0x130
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'İ' => Some(include!("../res_rasterized_characters/0x130_h32_wBold.txt")),
+        // letter: 'ı' / 0x131
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ı' => Some(include!("../res_rasterized_characters/0x131_h32_wBold.txt")),
+        // letter: 'Ĳ' / 0x132
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĳ' => Some(include!("../res_rasterized_characters/0x132_h32_wBold.txt")),
+        // letter: 'ĳ' / 0x133
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĳ' => Some(include!("../res_rasterized_characters/0x133_h32_wBold.txt")),
+        // letter: 'Ĵ' / 0x134
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĵ' => Some(include!("../res_rasterized_characters/0x134_h32_wBold.txt")),
+        // letter: 'ĵ' / 0x135
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĵ' => Some(include!("../res_rasterized_characters/0x135_h32_wBold.txt")),
+        // letter: 'Ķ' / 0x136
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ķ' => Some(include!("../res_rasterized_characters/0x136_h32_wBold.txt")),
+        // letter: 'ķ' / 0x137
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ķ' => Some(include!("../res_rasterized_characters/0x137_h32_wBold.txt")),
+        // letter: 'ĸ' / 0x138
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĸ' => Some(include!("../res_rasterized_characters/0x138_h32_wBold.txt")),
+        // letter: 'Ĺ' / 0x139
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ĺ' => Some(include!("../res_rasterized_characters/0x139_h32_wBold.txt")),
+        // letter: 'ĺ' / 0x13a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ĺ' => Some(include!("../res_rasterized_characters/0x13a_h32_wBold.txt")),
+        // letter: 'Ļ' / 0x13b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ļ' => Some(include!("../res_rasterized_characters/0x13b_h32_wBold.txt")),
+        // letter: 'ļ' / 0x13c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ļ' => Some(include!("../res_rasterized_characters/0x13c_h32_wBold.txt")),
+        // letter: 'Ľ' / 0x13d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ľ' => Some(include!("../res_rasterized_characters/0x13d_h32_wBold.txt")),
+        // letter: 'ľ' / 0x13e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ľ' => Some(include!("../res_rasterized_characters/0x13e_h32_wBold.txt")),
+        // letter: 'Ŀ' / 0x13f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŀ' => Some(include!("../res_rasterized_characters/0x13f_h32_wBold.txt")),
+        // letter: 'ŀ' / 0x140
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŀ' => Some(include!("../res_rasterized_characters/0x140_h32_wBold.txt")),
+        // letter: 'Ł' / 0x141
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ł' => Some(include!("../res_rasterized_characters/0x141_h32_wBold.txt")),
+        // letter: 'ł' / 0x142
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ł' => Some(include!("../res_rasterized_characters/0x142_h32_wBold.txt")),
+        // letter: 'Ń' / 0x143
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ń' => Some(include!("../res_rasterized_characters/0x143_h32_wBold.txt")),
+        // letter: 'ń' / 0x144
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ń' => Some(include!("../res_rasterized_characters/0x144_h32_wBold.txt")),
+        // letter: 'Ņ' / 0x145
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ņ' => Some(include!("../res_rasterized_characters/0x145_h32_wBold.txt")),
+        // letter: 'ņ' / 0x146
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ņ' => Some(include!("../res_rasterized_characters/0x146_h32_wBold.txt")),
+        // letter: 'Ň' / 0x147
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ň' => Some(include!("../res_rasterized_characters/0x147_h32_wBold.txt")),
+        // letter: 'ň' / 0x148
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ň' => Some(include!("../res_rasterized_characters/0x148_h32_wBold.txt")),
+        // letter: 'ŉ' / 0x149
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŉ' => Some(include!("../res_rasterized_characters/0x149_h32_wBold.txt")),
+        // letter: 'Ŋ' / 0x14a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŋ' => Some(include!("../res_rasterized_characters/0x14a_h32_wBold.txt")),
+        // letter: 'ŋ' / 0x14b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŋ' => Some(include!("../res_rasterized_characters/0x14b_h32_wBold.txt")),
+        // letter: 'Ō' / 0x14c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ō' => Some(include!("../res_rasterized_characters/0x14c_h32_wBold.txt")),
+        // letter: 'ō' / 0x14d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ō' => Some(include!("../res_rasterized_characters/0x14d_h32_wBold.txt")),
+        // letter: 'Ŏ' / 0x14e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŏ' => Some(include!("../res_rasterized_characters/0x14e_h32_wBold.txt")),
+        // letter: 'ŏ' / 0x14f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŏ' => Some(include!("../res_rasterized_characters/0x14f_h32_wBold.txt")),
+        // letter: 'Ő' / 0x150
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ő' => Some(include!("../res_rasterized_characters/0x150_h32_wBold.txt")),
+        // letter: 'ő' / 0x151
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ő' => Some(include!("../res_rasterized_characters/0x151_h32_wBold.txt")),
+        // letter: 'Œ' / 0x152
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Œ' => Some(include!("../res_rasterized_characters/0x152_h32_wBold.txt")),
+        // letter: 'œ' / 0x153
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'œ' => Some(include!("../res_rasterized_characters/0x153_h32_wBold.txt")),
+        // letter: 'Ŕ' / 0x154
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŕ' => Some(include!("../res_rasterized_characters/0x154_h32_wBold.txt")),
+        // letter: 'ŕ' / 0x155
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŕ' => Some(include!("../res_rasterized_characters/0x155_h32_wBold.txt")),
+        // letter: 'Ŗ' / 0x156
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŗ' => Some(include!("../res_rasterized_characters/0x156_h32_wBold.txt")),
+        // letter: 'ŗ' / 0x157
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŗ' => Some(include!("../res_rasterized_characters/0x157_h32_wBold.txt")),
+        // letter: 'Ř' / 0x158
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ř' => Some(include!("../res_rasterized_characters/0x158_h32_wBold.txt")),
+        // letter: 'ř' / 0x159
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ř' => Some(include!("../res_rasterized_characters/0x159_h32_wBold.txt")),
+        // letter: 'Ś' / 0x15a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ś' => Some(include!("../res_rasterized_characters/0x15a_h32_wBold.txt")),
+        // letter: 'ś' / 0x15b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ś' => Some(include!("../res_rasterized_characters/0x15b_h32_wBold.txt")),
+        // letter: 'Ŝ' / 0x15c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŝ' => Some(include!("../res_rasterized_characters/0x15c_h32_wBold.txt")),
+        // letter: 'ŝ' / 0x15d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŝ' => Some(include!("../res_rasterized_characters/0x15d_h32_wBold.txt")),
+        // letter: 'Ş' / 0x15e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ş' => Some(include!("../res_rasterized_characters/0x15e_h32_wBold.txt")),
+        // letter: 'ş' / 0x15f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ş' => Some(include!("../res_rasterized_characters/0x15f_h32_wBold.txt")),
+        // letter: 'Š' / 0x160
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Š' => Some(include!("../res_rasterized_characters/0x160_h32_wBold.txt")),
+        // letter: 'š' / 0x161
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'š' => Some(include!("../res_rasterized_characters/0x161_h32_wBold.txt")),
+        // letter: 'Ţ' / 0x162
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ţ' => Some(include!("../res_rasterized_characters/0x162_h32_wBold.txt")),
+        // letter: 'ţ' / 0x163
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ţ' => Some(include!("../res_rasterized_characters/0x163_h32_wBold.txt")),
+        // letter: 'Ť' / 0x164
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ť' => Some(include!("../res_rasterized_characters/0x164_h32_wBold.txt")),
+        // letter: 'ť' / 0x165
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ť' => Some(include!("../res_rasterized_characters/0x165_h32_wBold.txt")),
+        // letter: 'Ŧ' / 0x166
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŧ' => Some(include!("../res_rasterized_characters/0x166_h32_wBold.txt")),
+        // letter: 'ŧ' / 0x167
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŧ' => Some(include!("../res_rasterized_characters/0x167_h32_wBold.txt")),
+        // letter: 'Ũ' / 0x168
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ũ' => Some(include!("../res_rasterized_characters/0x168_h32_wBold.txt")),
+        // letter: 'ũ' / 0x169
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ũ' => Some(include!("../res_rasterized_characters/0x169_h32_wBold.txt")),
+        // letter: 'Ū' / 0x16a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ū' => Some(include!("../res_rasterized_characters/0x16a_h32_wBold.txt")),
+        // letter: 'ū' / 0x16b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ū' => Some(include!("../res_rasterized_characters/0x16b_h32_wBold.txt")),
+        // letter: 'Ŭ' / 0x16c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŭ' => Some(include!("../res_rasterized_characters/0x16c_h32_wBold.txt")),
+        // letter: 'ŭ' / 0x16d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŭ' => Some(include!("../res_rasterized_characters/0x16d_h32_wBold.txt")),
+        // letter: 'Ů' / 0x16e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ů' => Some(include!("../res_rasterized_characters/0x16e_h32_wBold.txt")),
+        // letter: 'ů' / 0x16f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ů' => Some(include!("../res_rasterized_characters/0x16f_h32_wBold.txt")),
+        // letter: 'Ű' / 0x170
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ű' => Some(include!("../res_rasterized_characters/0x170_h32_wBold.txt")),
+        // letter: 'ű' / 0x171
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ű' => Some(include!("../res_rasterized_characters/0x171_h32_wBold.txt")),
+        // letter: 'Ų' / 0x172
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ų' => Some(include!("../res_rasterized_characters/0x172_h32_wBold.txt")),
+        // letter: 'ų' / 0x173
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ų' => Some(include!("../res_rasterized_characters/0x173_h32_wBold.txt")),
+        // letter: 'Ŵ' / 0x174
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŵ' => Some(include!("../res_rasterized_characters/0x174_h32_wBold.txt")),
+        // letter: 'ŵ' / 0x175
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŵ' => Some(include!("../res_rasterized_characters/0x175_h32_wBold.txt")),
+        // letter: 'Ŷ' / 0x176
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ŷ' => Some(include!("../res_rasterized_characters/0x176_h32_wBold.txt")),
+        // letter: 'ŷ' / 0x177
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ŷ' => Some(include!("../res_rasterized_characters/0x177_h32_wBold.txt")),
+        // letter: 'Ÿ' / 0x178
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ÿ' => Some(include!("../res_rasterized_characters/0x178_h32_wBold.txt")),
+        // letter: 'Ź' / 0x179
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ź' => Some(include!("../res_rasterized_characters/0x179_h32_wBold.txt")),
+        // letter: 'ź' / 0x17a
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ź' => Some(include!("../res_rasterized_characters/0x17a_h32_wBold.txt")),
+        // letter: 'Ż' / 0x17b
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ż' => Some(include!("../res_rasterized_characters/0x17b_h32_wBold.txt")),
+        // letter: 'ż' / 0x17c
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ż' => Some(include!("../res_rasterized_characters/0x17c_h32_wBold.txt")),
+        // letter: 'Ž' / 0x17d
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'Ž' => Some(include!("../res_rasterized_characters/0x17d_h32_wBold.txt")),
+        // letter: 'ž' / 0x17e
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ž' => Some(include!("../res_rasterized_characters/0x17e_h32_wBold.txt")),
+        // letter: 'ſ' / 0x17f
+        #[cfg(feature = "unicode-latin-extended-a")]
+        'ſ' => Some(include!("../res_rasterized_characters/0x17f_h32_wBold.txt")),
         _ => None,
     }
 }
