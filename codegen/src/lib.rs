@@ -29,13 +29,12 @@ pub mod unicode;
 // All supported raster heights that will be generated.
 pub const SUPPORTED_RASTER_HEIGHTS: &[RasterHeight] = &[
     RasterHeight::new(14, true),
-    RasterHeight::new(16, false),
     RasterHeight::new(18, false),
-    RasterHeight::new(20, false),
     RasterHeight::new(22, false),
-    RasterHeight::new(24, false),
     RasterHeight::new(32, false),
-    RasterHeight::new(64, false),
+    // Everything larger than this produces huge amounts of pre-rasterized definitions.
+    // It's unlikely that there is ever a valid use-case for this library where one needs
+    // such big pre-rasterized letters.
 ];
 
 /// Teight of the rasterization process of certain characters. Like the font

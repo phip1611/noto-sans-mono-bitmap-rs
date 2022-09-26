@@ -20,7 +20,7 @@ pub const BITMAP_HEIGHT: usize = 18;
 /// The width of each bitmap character for the given font weight
 /// and size. This is a few percent less than [`BITMAP_HEIGHT`],
 /// because the bitmap font doesn't contain horizontal padding.
-pub const BITMAP_WIDTH: usize = 10;
+pub const BITMAP_WIDTH: usize = 9;
 
 /// Returns the bitmap of the given character of the pre rendered
 /// "Noto Sans Mono" raster for font weight regular and font size 16px

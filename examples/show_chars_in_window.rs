@@ -7,7 +7,7 @@ fn main() {
     // letters we want to print
     let msg = "Abc äöü!";
     let font_weight = FontWeight::Light;
-    let bitmap_height = RasterHeight::Size64;
+    let bitmap_height = RasterHeight::Size32;
     let buffer_height = bitmap_height.val();
     let char_width = get_raster_width(font_weight, bitmap_height);
     let buffer_width = char_width * msg.chars().count();

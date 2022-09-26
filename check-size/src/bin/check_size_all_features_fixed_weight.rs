@@ -19,12 +19,9 @@ fn select_font_size() -> RasterHeight {
 
     match char {
         'a' => RasterHeight::Size14,
-        'b' => RasterHeight::Size16,
         'c' => RasterHeight::Size18,
-        'd' => RasterHeight::Size20,
         'e' => RasterHeight::Size22,
         'f' => RasterHeight::Size32,
-        'g' => RasterHeight::Size64,
         _ => panic!()
     }
 }

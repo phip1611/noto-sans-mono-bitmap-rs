@@ -2,6 +2,8 @@
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
+- **Breaking** Now there are only the following `RasterHeight` available: 14, 18, 22, 32
+  Else, the space requirements are too big, especially, if new symbols are added in the future.
 - it's clear which unicode ranges are supported:
   currently only `basic-latin` and `latin-1-supplement`
 - changed the amount and naming of modules that are offered
