@@ -48,14 +48,14 @@
 //! let width = get_raster_width(FontWeight::Regular, RasterHeight::Size14);
 //! println!(
 //!     "Each char of the mono-spaced font will be {}px in width if the font \
-//!      weight={:?} and the bitmap height={}",
+//!      weight is {:?} and the height is {}",
 //!     width,
 //!     FontWeight::Regular,
 //!     RasterHeight::Size14.val()
 //! );
-//! let bitmap_char = get_raster('A', FontWeight::Regular, RasterHeight::Size14).expect("unsupported char");
-//! println!("{:?}", bitmap_char);
-//! for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
+//! let char_raster = get_raster('A', FontWeight::Regular, RasterHeight::Size14).expect("unsupported char");
+//! println!("{:?}", char_raster);
+//! for (row_i, row) in char_raster.raster().iter().enumerate() {
 //!     for (col_i, pixel) in row.iter().enumerate() {
 //!         println!("[{:02}][{:02}]: {:03}", row_i, col_i, pixel);
 //!     }
@@ -102,40 +102,36 @@ mod bold;
 mod light;
 mod regular;
 
-/// Describes the relevant information for a rendered char of the bitmap font.
-///
-/// To see why the term "bitmap" is used, see section Terminology in the README.
+/// Describes the relevant information for a rendered char of the font.
 #[derive(Debug)]
-pub struct BitmapChar {
+pub struct RasterizedChar {
     /// The actual font data that is `height` * `width` bytes in size.
     /// Each byte describes the intensity of a pixel from 0 to 255.
-    ///
-    /// To see why the term "bitmap" is used, see section Terminology in the README.
-    bitmap: &'static [&'static [u8]],
-    /// Height of the bitmap box. The actual font size is slightly smaller.
+    raster: &'static [&'static [u8]],
+    /// Height of the raster box. The actual font size is slightly smaller.
     height: usize,
-    /// The width of the bitmap char. It is guaranteed, that all chars
-    /// of the same font weight and bitmap height also have the same width
+    /// The width of the rasterized char. It is guaranteed, that all chars
+    /// of the same font weight and raster height also have the same width
     /// (as you would expect from a mono font.)
     width: usize,
 }
 
-impl BitmapChar {
+impl RasterizedChar {
     /// The actual font data that is `height` * `width` bytes in size.
     /// Each byte describes the intensity of a pixel from 0 to 255.
     #[inline]
-    pub const fn bitmap(&self) -> &'static [&'static [u8]] {
-        self.bitmap
+    pub const fn raster(&self) -> &'static [&'static [u8]] {
+        self.raster
     }
 
-    /// Height of the bitmap box. The actual font size is slightly smaller.
+    /// Height of the raster box. The actual font size is slightly smaller.
     #[inline]
     pub const fn height(&self) -> usize {
         self.height
     }
 
-    /// The width of the bitmap char. It is guaranteed, that all chars
-    /// of the same font weight and bitmap height also have the same width
+    /// The width of the raster char. It is guaranteed, that all chars
+    /// of the same font weight and raster height also have the same width
     /// (as you would expect from a mono font).
     #[inline]
     pub const fn width(&self) -> usize {
@@ -165,15 +161,12 @@ impl FontWeight {
     }
 }
 
-/// The height of the bitmap font. The font size will be a a few
-/// percent less, because each bitmap letter contains vertical padding
-/// for proper alignment of chars (i.e. ÄyA). The width of each bitmap
-/// character will be also less than the height, because there is no
-/// horizontal padding included.
+/// The height of the pre-rasterized font. The font size will be a a few
+/// percent less, because each letter contains vertical padding for proper
+/// alignment of chars (i.e. ÄyA). The width of each character will be also
+/// less than the height, because there is no horizontal padding included.
 ///
 /// The available variants depend on the selected Cargo build features.
-///
-/// To see why the term "bitmap" is used, see section Terminology in the README.
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 pub enum RasterHeight {
@@ -195,15 +188,13 @@ impl RasterHeight {
     }
 }
 
-/// Returns a [`BitmapChar`] for the given char, [`FontWeight`], and [`RasterHeight`].
+/// Returns a [`RasterizedChar`] for the given char, [`FontWeight`], and [`RasterHeight`].
 ///
-/// Returns None, if the given char is not known by the bitmap font. In this case,
+/// Returns None, if the given char is not known by the font. In this case,
 /// you could fall back to `get_raster(' ', ...)`.
-///
-/// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
-pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<BitmapChar> {
-    let bitmap = match style {
+pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<RasterizedChar> {
+    let raster = match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
@@ -239,8 +230,8 @@ pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<Bitm
         },
     };
 
-    bitmap.map(|bitmap| BitmapChar {
-        bitmap,
+    raster.map(|raster| RasterizedChar {
+        raster,
         height: size.val(),
         width: get_raster_width(style, size),
     })
@@ -249,43 +240,41 @@ pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<Bitm
 /// Returns the width in pixels a char will occupy on the screen. The width is constant for all
 /// characters regarding the same combination of [`FontWeight`] and [`RasterHeight`]. The width is
 /// a few percent smaller than the height of each char
-///
-/// To see why the term "bitmap" is used, see section Terminology in the README.
 #[inline]
 pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
             #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::light::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::light::size_14::RASTER_WIDTH,
             #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::light::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::light::size_18::RASTER_WIDTH,
             #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::light::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::light::size_22::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
-            RasterHeight::Size32 => crate::light::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::light::size_32::RASTER_WIDTH,
         },
         #[cfg(feature = "regular")]
         FontWeight::Regular => match size {
             #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::regular::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::regular::size_14::RASTER_WIDTH,
             #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::regular::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::regular::size_18::RASTER_WIDTH,
             #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::regular::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::regular::size_22::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
-            RasterHeight::Size32 => crate::regular::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::regular::size_32::RASTER_WIDTH,
         },
         #[cfg(feature = "bold")]
         FontWeight::Bold => match size {
             #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::bold::size_14::BITMAP_WIDTH,
+            RasterHeight::Size14 => crate::bold::size_14::RASTER_WIDTH,
             #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::bold::size_18::BITMAP_WIDTH,
+            RasterHeight::Size18 => crate::bold::size_18::RASTER_WIDTH,
             #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::bold::size_22::BITMAP_WIDTH,
+            RasterHeight::Size22 => crate::bold::size_22::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
-            RasterHeight::Size32 => crate::bold::size_32::BITMAP_WIDTH,
+            RasterHeight::Size32 => crate::bold::size_32::RASTER_WIDTH,
         },
     }
 }

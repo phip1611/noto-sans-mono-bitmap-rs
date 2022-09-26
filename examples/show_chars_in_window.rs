@@ -7,22 +7,22 @@ fn main() {
     // letters we want to print
     let msg = "Abc äöü!";
     let font_weight = FontWeight::Light;
-    let bitmap_height = RasterHeight::Size32;
-    let buffer_height = bitmap_height.val();
-    let char_width = get_raster_width(font_weight, bitmap_height);
+    let raster_height = RasterHeight::Size32;
+    let buffer_height = raster_height.val();
+    let char_width = get_raster_width(font_weight, raster_height);
     let buffer_width = char_width * msg.chars().count();
     let mut draw_buffer = vec![0; buffer_height * buffer_width];
 
     // rasterize each char and draw it into the framebuffer
     for (char_i, char) in msg.chars().enumerate() {
-        let bitmap_char = get_raster(char, font_weight, bitmap_height).expect("unknown char");
-        for (row_i, row) in bitmap_char.bitmap().iter().enumerate() {
+        let char_raster = get_raster(char, font_weight, raster_height).expect("unknown char");
+        for (row_i, row) in char_raster.raster().iter().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
                 let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
 
-                let index = char_i * bitmap_char.width() + col_i + row_i * buffer_width;
+                let index = char_i * char_raster.width() + col_i + row_i * buffer_width;
 
                 draw_buffer[index] = rgb_32;
             }

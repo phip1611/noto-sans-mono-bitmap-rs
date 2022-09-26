@@ -296,7 +296,7 @@ fn codegen_lib_rs() {
                 .unwrap();
                 writeln!(
                     &mut get_raster_width_match,
-                    "            RasterHeight::Size{} => crate::{}::size_{}::BITMAP_WIDTH,",
+                    "            RasterHeight::Size{} => crate::{}::size_{}::RASTER_WIDTH,",
                     size.value(),
                     w.mod_name(),
                     size.value()
@@ -319,7 +319,7 @@ fn codegen_lib_rs() {
                     weight_variants.as_str()
                 )
                 .replace(
-                    "// %CODEGEN_BITMAP_SIZE_ENUM_VARIANTS%",
+                    "// %CODEGEN_RASTER_SIZE_ENUM_VARIANTS%",
                     font_size_enum_variants.as_str()
                 )
                 .replace("// %CODEGEN_get_raster%", get_raster_match.as_str())
@@ -381,7 +381,7 @@ fn codegen_font_weight_sub_modules(
     let mut size_mod_file = {
         let mut mod_file_path = PathBuf::from(CODEGEN_BASE_PATH);
         mod_file_path.push(weight.mod_name());
-        mod_file_path.push(format!("size_{}.rs", font.bitmap_height()));
+        mod_file_path.push(format!("size_{}.rs", font.raster_height()));
 
         File::options()
             .create(true)
@@ -399,14 +399,14 @@ fn codegen_font_weight_sub_modules(
             "{}",
             SIZE_MOD_TEMPLATE
                 .replace("%FONT_WEIGHT%", weight.mod_name())
-                .replace("%FONT_SIZE%", &format!("{}", font.bitmap_height()))
+                .replace("%FONT_SIZE%", &format!("{}", font.raster_height()))
                 .replace(
-                    "%CODEGEN_BITMAP_HEIGHT%",
-                    &format!("{}", font.bitmap_height())
+                    "%CODEGEN_RASTER_HEIGHT%",
+                    &format!("{}", font.raster_height())
                 )
                 .replace(
-                    "%CODEGEN_BITMAP_WIDTH%",
-                    &format!("{}", font.bitmap_width())
+                    "%CODEGEN_RASTER_WIDTH%",
+                    &format!("{}", font.raster_width())
                 )
         )
         .unwrap();
@@ -415,13 +415,12 @@ fn codegen_font_weight_sub_modules(
     // the rest of the file generates the big match-block that maps characters to the pre-rasterized
     // bytes.
 
-    // prepares the "get_char" function with it's match block
+    // prepares the "get_char" function with its match block
     let mut code_range_string = String::new();
     {
         writeln!(
             &mut code_range_string,
-            "/// Returns the bitmap of the given character of the pre rendered\n\
-        /// \"Noto Sans Mono\" raster for font weight {} and font size {}px",
+            "/// Returns the raster of the given character for font weight {} and font size {}px",
             weight.mod_name(),
             font.font_size().round()
         )
@@ -443,7 +442,7 @@ fn codegen_font_weight_sub_modules(
             .iter()
             .filter(|x| x.is_visible_char())
             .map(|x| x.get_char())
-            .map(|char| (char, font.rasterize_to_bitmap(char)))
+            .map(|char| (char, font.rasterize(char)))
             .for_each(|(char, raster)| {
                 writeln!(
                     &mut code_range_string,
@@ -468,7 +467,7 @@ fn codegen_font_weight_sub_modules(
                     Context {
                         c: char,
                         weight: weight.clone(),
-                        height: font.bitmap_height() as u32,
+                        height: font.raster_height() as u32,
                     },
                 );
 

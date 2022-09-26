@@ -111,10 +111,10 @@ pub struct ToBitmapFont {
     /// See [`Font`].
     font: Font,
     /// Height of the raster for the font rasterization.
-    bitmap_height: usize,
+    raster_height: usize,
     /// Width of each letter for the font rasterization.
     /// This width ensures that the font is indeed a mono-space font.
-    bitmap_width: usize,
+    raster_width: usize,
     /// This is a little lower value than the height and is required to place the
     /// letter inside the box without clipping at the top or at the bottom.
     font_size: f32,
@@ -127,15 +127,15 @@ impl ToBitmapFont {
     /// Creates a new object, ready to rasterize characters into a bitmap.
     ///
     /// # Parameters
-    /// * `bitmap_height` height of the bitmap. A little bit bigger than the font on the screen.
+    /// * `raster_height` height of the bitmap. A little bit bigger than the font on the screen.
     ///                   Values are for example 14, 16, 24,.
     /// * `font_bytes` Raw bytes of a font file, that [`fontdue`] can parse.
-    pub fn new(bitmap_height: usize, font_bytes: &[u8]) -> Self {
+    pub fn new(raster_height: usize, font_bytes: &[u8]) -> Self {
         // We need some padding at the top and the bottom of each box, because
         // of letters such as "Ä" and "y". I figured the value out just by trying
         // with my "rasterize_chars_in_window" binary. It depends on the y_offset
         // in `rasterize_to_bitmap()`
-        let font_size = (bitmap_height as f32 * 0.84).ceil();
+        let font_size = (raster_height as f32 * 0.84).ceil();
 
         let font = Font::from_bytes(
             font_bytes,
@@ -146,12 +146,12 @@ impl ToBitmapFont {
         )
         .unwrap();
 
-        let (widest_char, bitmap_width) = Self::find_max_width(&font, font_size);
+        let (widest_char, raster_width) = Self::find_max_width(&font, font_size);
 
         Self {
             font,
-            bitmap_height,
-            bitmap_width,
+            raster_height,
+            raster_width,
             font_size,
             widest_char,
         }
@@ -161,11 +161,11 @@ impl ToBitmapFont {
     /// resulting bitmap mono font is horizontal and vertical aligned to the center. Furthermore,
     /// the resulting mono font contains already a vertical line spacing of a few pixels, but no
     /// padding to the left and right.
-    pub fn rasterize_to_bitmap(&self, c: char) -> Vec<Vec<u8>> {
+    pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
         let (metrics, fontdue_bitmap) = self.font.rasterize(c, self.font_size);
 
         // the bitmap that will contain the properly aligned rasterized char
-        let mut letter_bitmap = vec![vec![0_u8; self.bitmap_width]; self.bitmap_height];
+        let mut letter_bitmap = vec![vec![0_u8; self.raster_width]; self.raster_height];
 
         for ((y, x), intensity) in fontdue_bitmap
             .iter()
@@ -173,7 +173,7 @@ impl ToBitmapFont {
             .map(|(i, p)| (i as isize, p))
             .map(|(i, p)| {
                 // align to horizontal center
-                let x_offset = (self.bitmap_width as isize - metrics.width as isize) / 2;
+                let x_offset = (self.raster_width as isize - metrics.width as isize) / 2;
 
                 // align to vertical center
                 // 1) bounds:height: align big letters to groundline regarding the font size
@@ -182,7 +182,7 @@ impl ToBitmapFont {
                 y_offset -= metrics.ymin as isize;
                 // 3) move everything slightly to the top; I figured this out by trying with
                 //    my "rasterize_chars_in_window" binary
-                y_offset -= (self.bitmap_height as f32 * 0.07) as isize;
+                y_offset -= (self.raster_height as f32 * 0.07) as isize;
 
                 let x = i % metrics.width as isize;
                 let y = i as isize / metrics.width as isize;
@@ -191,8 +191,8 @@ impl ToBitmapFont {
                 let y = y + y_offset;
 
                 // if some letter is "too" big and out of bounds the box: cut and prevent error
-                let x = trim_index_to_bounds!(x, self.bitmap_width());
-                let y = trim_index_to_bounds!(y, self.bitmap_height());
+                let x = trim_index_to_bounds!(x, self.raster_width());
+                let y = trim_index_to_bounds!(y, self.raster_height());
 
                 ((y, x), p)
             })
@@ -220,12 +220,14 @@ impl ToBitmapFont {
             .unwrap()
     }
 
-    pub const fn bitmap_height(&self) -> usize {
-        self.bitmap_height
+    pub const fn raster_height(&self) -> usize {
+        self.raster_height
     }
-    pub const fn bitmap_width(&self) -> usize {
-        self.bitmap_width
+
+    pub const fn raster_width(&self) -> usize {
+        self.raster_width
     }
+
     pub const fn font_size(&self) -> f32 {
         self.font_size
     }
@@ -243,8 +245,9 @@ mod tests {
     #[test]
     fn test_font_props() {
         let props = ToBitmapFont::new(16, NOTO_SANS_MONO_REGULAR);
-        println!("bitmap_height = {}", props.bitmap_height());
-        println!("bitmap_width  = {}", props.bitmap_width());
+        println!("raster_height = {}", props.raster_height());
         println!("font_size     = {}", props.font_size());
+        println!("raster_width  = {}", props.raster_width());
+        println!("widest_char   = '{}'", props.widest_char());
     }
 }

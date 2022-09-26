@@ -8,7 +8,7 @@ fn main() {
     let _ = std::io::stdin().read_line(&mut line);
     let char = line.chars().next().unwrap();
 
-    let raster = noto_sans_mono_bitmap::get_bitmap(char, FontWeight::Regular, select_font_size()).unwrap();
+    let raster = noto_sans_mono_bitmap::get_raster(char, FontWeight::Regular, select_font_size()).unwrap();
     println!("{raster:?}");
 }
 

@@ -8,6 +8,6 @@ fn main() {
     let _ = std::io::stdin().read_line(&mut line);
     let char = line.chars().next().unwrap();
 
-    let raster = noto_sans_mono_bitmap::get_bitmap(char, FontWeight::Regular, RasterHeight::Size14).unwrap();
+    let raster = noto_sans_mono_bitmap::get_raster(char, FontWeight::Regular, RasterHeight::Size14).unwrap();
     println!("{raster:?}");
 }

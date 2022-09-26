@@ -1,29 +1,22 @@
 //! Module for letters with the font weight light and size 18.
 //!
-//! The bitmap font contains all unicode symbols from 0x00 to 0x17f with
-//! the exception of control characters. It includes Basic Latin
-//! Latin-1 Supplement and Latin extended A. This means the typical letters
-//! and symbols from a QWERTZ/QWERTY keyboard plus symbols such as Ö, Ä,
-//! and Ü.
-//!
 //! # Font License
 //! * Downloaded from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
 //! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
-/// The height of each bitmap character for the given font weight
-/// and size. This size corresponds to the size of the module name.
-/// The font size will be a few percent smaller, because each
-/// bitmap contains a small vertical padding.
+/// The height of each rasterized character for the given font weight
+/// and size. This size corresponds to the size of the module name. The
+/// font size will be a few percent smaller, as each raster contains a
+/// small vertical padding.
 #[allow(dead_code)]
-pub const BITMAP_HEIGHT: usize = 18;
+pub const RASTER_HEIGHT: usize = 18;
 
-/// The width of each bitmap character for the given font weight
-/// and size. This is a few percent less than [`BITMAP_HEIGHT`],
-/// because the bitmap font doesn't contain horizontal padding.
-pub const BITMAP_WIDTH: usize = 8;
+/// The width of each rasterized character for the given font weight and
+/// size. This is a few percent less than [`RASTER_HEIGHT`], as the letters
+/// need to be close together to "look normal", i.e., no horizontal padding.
+pub const RASTER_WIDTH: usize = 8;
 
-/// Returns the bitmap of the given character of the pre rendered
-/// "Noto Sans Mono" raster for font weight light and font size 16px
+/// Returns the raster of the given character for font weight light and font size 16px
 #[inline]
 pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
     match c {
