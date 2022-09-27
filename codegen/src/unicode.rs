@@ -70,6 +70,13 @@ pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
         begin: 0x25a0,
         end: 0x25ff,
         default_feature: false,
+    },*//*
+    // includes "�", i.e., the generic replacement character
+    UnicodeRange {
+        feature_name: "unicode-specials",
+        begin: 0xfff0,
+        end: 0xffff,
+        default_feature: false,
     },*/
 ];
 
