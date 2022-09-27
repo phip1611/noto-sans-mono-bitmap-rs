@@ -129,6 +129,8 @@ impl<'a> Iterator for UnicodeRangeIter<'a> {
             // The basic-latin block contains some non-displayable symbols. I take care of them
             // here. Background: https://unicode-table.com/en/blocks/basic-latin/
             let symbol = match self.counter {
+                // todo this whole code is not so nice...
+                // this should be moved to unicode range structs
                 0..=0x1f => UnicodeSymbol::Control,
                 0x20..=0x7e => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
                 0x7f => UnicodeSymbol::Control,

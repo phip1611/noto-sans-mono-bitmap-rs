@@ -421,7 +421,9 @@ fn codegen_font_weight_sub_modules(
     {
         writeln!(
             &mut code_range_string,
-            "/// Returns the raster of the given character for font weight {} and font size {}px",
+            "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
+            /// Wide characters, such as '�', will be truncated in their width in order to fullfill\n\
+            /// the mono font guarantee. All characters are centered in their raster.",
             weight.mod_name(),
             font.font_size().round()
         )

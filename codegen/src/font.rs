@@ -210,14 +210,13 @@ impl RasterizationInfo {
         letter_bitmap
     }
 
-    /// A brute force approach to find the maximum width, that a pre-rasterized character
-    /// will have for the given font size. This way, the width of the final raster can be reduced
-    /// to HEIGHT x WIDTH instead of HEIGHT x HEIGHT, which would result a big space between all
-    /// letters. The pre-rasterized characters will be all "monospaced" out-of-the box with
-    /// this approach.
+    /// Searches the maximum width, that a pre-rasterized character/ will have for the given font
+    /// size. This way, the width of the final raster can be reduced to HEIGHT x WIDTH instead of
+    /// HEIGHT x HEIGHT, which would result a big space between all letters. The pre-rasterized
+    /// characters will be all "monospaced" out-of-the box with this approach.
     ///
-    /// This function only takes ASCII letters into account. Wider symbols are ignored and later
-    /// truncated/cutted to the width.
+    /// This function only takes ASCII letters (BASIC_LATIN) into account. Wider symbols are
+    /// ignored and will later be truncated/cutted to this width.
     fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
         let (char, max) = SUPPORTED_UNICODE_RANGES
             .iter()

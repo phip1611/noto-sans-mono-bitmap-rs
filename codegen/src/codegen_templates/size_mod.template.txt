@@ -4,14 +4,15 @@
 //! * Downloaded from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
 //! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
-/// The height of each rasterized character for the given font weight
-/// and size. This size corresponds to the size of the module name. The
-/// font size will be a few percent smaller, as each raster contains a
-/// small vertical padding.
+/// The constant height of each rasterized character for the given font weight
+/// and size. This size corresponds to the size of the module name. The font
+/// size will be a few percent smaller, as each raster contains a small vertical
+/// to ensure vertical alignment of multiple characters.
 #[allow(dead_code)]
 pub const RASTER_HEIGHT: usize = %CODEGEN_RASTER_HEIGHT%;
 
-/// The width of each rasterized character for the given font weight and
-/// size. This is a few percent less than [`RASTER_HEIGHT`], as the letters
-/// need to be close together to "look normal", i.e., no horizontal padding.
+/// The constant width of each rasterized character for the given font weight and
+/// size. This is less than [`RASTER_HEIGHT`], so that multiple letters can be print
+/// next to each other and look "nice" out-of-the-box, hence, library users do not
+/// have to perform additional alignment of characters or fill in padding.
 pub const RASTER_WIDTH: usize = %CODEGEN_RASTER_WIDTH%;

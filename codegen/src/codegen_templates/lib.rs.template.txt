@@ -9,35 +9,29 @@
 //!
 //! ## TL;DR
 //! * ✅ `no_std`, zero allocations, no floating point operations
-//! * ✅ most important symbols, numbers, and letters as pre-rasterized bitmap. Unicode-ranges are selectable.
+//! * ✅ most important symbols, numbers, and letters as pre-rasterized constant. Unicode-ranges are selectable.
 //! * ✅ Noto Sans Mono font as base
 //! * ✅ different sizes and font weights (light, normal, bold)
 //! * ✅ nice anti-aliasing/smoothing and better looking than legacy bitmap fonts
 //! * ✅ every pixel is encoded in a byte (0-255) and not a bit, which results in a much nicer result on the screen.
-//! * ✅ relevant font sizes, such as 14, 16, 24, 32, and 64px (as optional build time features)
+//! * ✅ relevant font sizes, such as 14, 18, 22, and 32px (as optional build time features)
 //! * ✅ zero dependencies
+//! * ✅ All characters are aligned in their box/raster. If they are printed next to each other, the result looks nice.
 //!
 //! ## Terminology: Is Bitmap Font The Right Term?
-//! Legacy (8x8) bitmap fonts usually refer to a font where each symbol is encoded in 8 bytes. The ones in a byte
-//! (`0b00110000`) means "pixel on" and the zeroes' means "pixel off". However, my bitmap font actually encodes the
+//! Legacy (8x8) bitmap fonts usually refer to a font where each symbol is encoded in 8 bits. The ones in a byte
+//! (`0b00110000`) means "pixel on" and the zeroes' means "pixel off". However, my font actually encodes the
 //! intensity of each pixel as a byte from 0 to 255. Hence, this is less size efficient than legacy bitmap fonts,
 //! but looks much better. I still use the term bitmap font, because that term is used and known when talking
-//! about pre-rasterized fonts/font rendering in an early stage of the boot process.
+//! about pre-rasterized fonts/font rendering in low-level contexts, such as the boot process.
 //!
 //! ## When To Use This Crate
-//! If you develop a kernel, you usually don't want to use the FPU (i.e. only soft float),
-//! because otherwise you need to save the floating point registers on every context switch,
-//! which is expensive. Because nice font rendering of TTF fonts heavily relies on many
-//! floating point operations, this is not optimal inside a kernel (noticeable performance penalties).
-//! Furthermore, in my experience it was hard to get some of the popular font rasterization
-//! crates to compile with CPU features "+soft-float" and "-sse" (at least on x86_64).
-//!
-//! Legacy 8x8 bitmap fonts are ugly when printed to the screen. My crate can be seen as a nice
-//! replacement with very nice anti-aliasing.
-//!
-//! If you have a standard environment or support for floating point operations, you might want
-//! to rasterize the font by yourself with the crate `fontdue` and some TTF fonts rather than
-//! using my crate.
+//! If you want to print to a framebuffer and if you develop a bootloader or a kernel, you usually don't
+//! want to enable the FPU and refrain from floating point instruction (i.e. only use soft float).
+//! My crate is a good option to print characters nicely to the screen in such scenarios. As nice live
+//! font rendering of TTF fonts heavily relies on many floating point operations, which is not optimal
+//! inside a low level binary. Legacy 8x8 bitmap fonts are ugly when printed to the screen.
+//! `noto_sans_mono_bitmap` can be seen as a nice replacement with very nice anti-aliasing.
 //!
 //! ## Minimal Code Example
 //! ```rust
@@ -71,7 +65,7 @@
 //!
 //! With all features included inside the binary, and without any discarding by the compiler, you
 //! can expect 5 or more MiB of memory requirements. However, this would require the rather unlikely
-//! case that you use different sizes and font weights simulatnously. etc.
+//! case that you use different sizes and font weights simultaneously.
 //!
 //! For a full support of all unicode ranges, use an on-the-fly rasterization process instead of this
 //! crate.
