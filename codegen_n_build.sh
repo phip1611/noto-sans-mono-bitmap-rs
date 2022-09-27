@@ -12,12 +12,21 @@ cd "$DIR" || exit
 
 echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the build, and applies Rustfmt and clippy afterwards."
 
+# delete all generated raster files from previous run; irrelevant anyway
+# Should not be neccesarry now, as the file name is deterministic. Might be relevant, if we ever
+# remove functionality again.
+# find src/res_rasterized_characters -type f -name "*.txt" -exec rm {} +
+
 cd "codegen" || exit
 # Needs rustc 1.58 or above
-cargo +stable run --release --bin codegen
+cargo fmt
+cargo test
+RUSTFLAGS="-C target-cpu=native" cargo run --release --bin codegen
 cd ..
 
 cargo fmt
-cargo +stable clippy --features all  --all-targets
-cargo +stable doc --features all
-cargo +stable build --features all --all-targets
+# don't use "--all-targets" here; seems like it tests all other targets and not the lib
+cargo test --features all
+cargo clippy --features all  --all-targets
+cargo doc --features all
+cargo build --features all --all-targets

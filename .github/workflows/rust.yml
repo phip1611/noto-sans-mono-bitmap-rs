@@ -31,11 +31,11 @@ jobs:
           override: true
       - run: sudo apt update && sudo apt install libxkbcommon-dev -y
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose --features all
         # the library itself has no tests but the codegen project has tests
         # so effectively, this is useless
       - name: Run tests
-        run: cargo test
+        run: cargo test --features all
 
   # this only tests the generated project that was checked in but not the
   # codegen project itself
@@ -60,7 +60,7 @@ jobs:
       - name: "Rustup: install some no_std target"
         run: rustup target add thumbv7em-none-eabihf
       - name: Build (no_std)
-        run: cargo build --target thumbv7em-none-eabihf
+        run: cargo build --target thumbv7em-none-eabihf --features all
 
   # this only tests the generated project that was checked in but not the
   # codegen project itself
@@ -82,6 +82,6 @@ jobs:
       - name: Rustfmt
         run: cargo fmt -- --check
       - name: Clippy
-        run: cargo clippy
+        run: cargo clippy --features all
       - name: Rustdoc
-        run: cargo doc
+        run: cargo doc --features all

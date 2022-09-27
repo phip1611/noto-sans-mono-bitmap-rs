@@ -7,11 +7,17 @@ publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+# Accelerate codegen process
+# https://deterministic.space/high-performance-rust.html
+lto = true
+codegen-units = 1
+
 [profile.dev]
 # otherwise fontdue generation is very slow
 opt-level = 1
 
 [dependencies]
-fontdue = "0.6.2"
-minifb = "0.20.0"
+fontdue = { version = "0.7.2", features = ["parallel", "simd"] }
+minifb = "0.23.0"
 

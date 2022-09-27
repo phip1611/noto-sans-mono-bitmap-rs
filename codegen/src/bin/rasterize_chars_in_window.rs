@@ -1,7 +1,7 @@
 //! Helper binary to rasterize a few letters with fontdue in a window and display its
 //! rasterized dimensions.
 
-use codegen::font::ToBitmapFont;
+use codegen::font::RasterizationInfo;
 use minifb::{Key, Window, WindowOptions};
 
 fn main() {
@@ -10,11 +10,11 @@ fn main() {
 
     let font_bytes = include_bytes!("../res/NotoSansMono-Regular.ttf") as &[u8];
 
-    let bitmap_height = 36;
-    let font = ToBitmapFont::new(bitmap_height, font_bytes);
-    let height = font.bitmap_height();
+    let raster_height = 36;
+    let font = RasterizationInfo::new(raster_height, font_bytes);
+    let height = font.raster_height();
     // make sure N mono-sized letters can be inside the frame buffer
-    let width = font.bitmap_width() * msg.chars().count();
+    let width = font.raster_width() * msg.chars().count();
     let mut draw_buffer: Vec<u32> = vec![0; width * height];
 
     // set white background
@@ -26,14 +26,14 @@ fn main() {
 
     // rasterize each char and draw it into the framebuffer
     for (char_i, char) in msg.chars().enumerate() {
-        let letter_bitmap = font.rasterize_to_bitmap(char);
+        let letter_bitmap = font.rasterize(char);
         for (row_i, row) in letter_bitmap.iter().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
                 let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
 
-                let index = char_i * font.bitmap_width() + col_i + row_i * width;
+                let index = char_i * font.raster_width() + col_i + row_i * width;
 
                 draw_buffer[index] = rgb_32;
             }
@@ -45,7 +45,7 @@ fn main() {
         let (r, g, b) = (255, 0, 0);
         let rgb_32 = /*0 << 24 |*/ r << 16 | g << 8 | b;
         for j in 0..height {
-            let index = border_i * font.bitmap_width() + j * width;
+            let index = border_i * font.raster_width() + j * width;
             draw_buffer[index] = rgb_32;
         }
     }
