@@ -1,7 +1,7 @@
 //! Helper binary to rasterize a few letters with fontdue in a window and display its
 //! rasterized dimensions.
 
-use codegen::font::ToBitmapFont;
+use codegen::font::RasterizationInfo;
 use minifb::{Key, Window, WindowOptions};
 
 fn main() {
@@ -11,7 +11,7 @@ fn main() {
     let font_bytes = include_bytes!("../res/NotoSansMono-Regular.ttf") as &[u8];
 
     let raster_height = 36;
-    let font = ToBitmapFont::new(raster_height, font_bytes);
+    let font = RasterizationInfo::new(raster_height, font_bytes);
     let height = font.raster_height();
     // make sure N mono-sized letters can be inside the frame buffer
     let width = font.raster_width() * msg.chars().count();

@@ -14,7 +14,7 @@ pub const RASTER_HEIGHT: usize = 14;
 /// The width of each rasterized character for the given font weight and
 /// size. This is a few percent less than [`RASTER_HEIGHT`], as the letters
 /// need to be close together to "look normal", i.e., no horizontal padding.
-pub const RASTER_WIDTH: usize = 9;
+pub const RASTER_WIDTH: usize = 8;
 
 /// Returns the raster of the given character for font weight bold and font size 12px
 #[inline]

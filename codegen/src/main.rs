@@ -19,7 +19,7 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use codegen::bytes_outsourcer::{BytesToFileOutsourcer, Context};
-use codegen::font::{noto_font_by_weight, FontWeight, ToBitmapFont, SUPPORTED_FONT_WEIGHTS};
+use codegen::font::{noto_font_by_weight, FontWeight, RasterizationInfo, SUPPORTED_FONT_WEIGHTS};
 use codegen::{
     CARGO_LIB_RS, CARGO_TOML_TEMPLATE, CODEGEN_BASE_PATH, CODEGEN_RASTERIZED_BYTES_PATH,
     SIZE_MOD_TEMPLATE, SUPPORTED_RASTER_HEIGHTS, SUPPORTED_UNICODE_RANGES, WEIGHT_MOD_TEMPLATE,
@@ -37,7 +37,8 @@ fn main() {
 
     // debugging info
     {
-        let font = ToBitmapFont::new(20 as usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
+        let font =
+            RasterizationInfo::new(20 as usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
         println!("INFO: The widest char is '{}'", font.widest_char());
     }
 
@@ -365,7 +366,7 @@ fn codegen_font_weight_module(
         writeln!(&mut mod_file, "#[cfg(feature = \"size_{}\")]", size).unwrap();
         writeln!(&mut mod_file, "pub mod size_{};", size).unwrap();
 
-        let font = ToBitmapFont::new(size as usize, font_bytes);
+        let font = RasterizationInfo::new(size as usize, font_bytes);
         codegen_font_weight_sub_modules(font, weight, outsourcer);
     }
 }
@@ -373,7 +374,7 @@ fn codegen_font_weight_module(
 /// Creates a `<weight>/size_<size>.rs` file performs all the code generation for the byte look-up of
 /// the pre-rasterized characters.
 fn codegen_font_weight_sub_modules(
-    font: ToBitmapFont,
+    font: RasterizationInfo,
     weight: &FontWeight,
     outsourcer: &mut BytesToFileOutsourcer,
 ) {

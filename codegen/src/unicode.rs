@@ -1,4 +1,4 @@
-/// The unicode ranges that this library can generate.
+/// The unicode ranges that the library will support.
 pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
     // ASCII
     UnicodeRange {
@@ -140,7 +140,7 @@ impl<'a> Iterator for UnicodeRangeIter<'a> {
 /// Return type for the [`UnicodeIter`] iterator.
 #[derive(Debug)]
 pub enum UnicodeSymbol {
-    // Regular chars/symbols.
+    // Regular, visible chars/symbols.
     Char(char),
     // for example U+00AD (soft hyphen)
     NonDisplayableSymbol(char),
@@ -149,10 +149,31 @@ pub enum UnicodeSymbol {
 }
 
 impl UnicodeSymbol {
+    /// Returns true, if the variant is of type [`Self::Char`].
     pub const fn is_visible_char(&self) -> bool {
         matches!(self, Self::Char(_))
     }
 
+    /// Returns true if the variant is of type [`Self::Char`] and the character
+    /// is a "normal sized char". For example, `a` and `L` are normal sized chars
+    /// but `�` is not. `�` must be truncated to the left and right, so that the
+    /// whole font is indeed a mono-space font.
+    ///
+    /// From this information, the codegen project will determine the raster width
+    /// for all characters.
+    pub const fn is_normal_sized_char(&self) -> bool {
+        match self {
+            Self::Char(c) => match c {
+                // full visible ASCII range
+                '\x21'..='\x72' => true,
+                _ => false,
+            },
+            _ => false,
+        }
+    }
+
+    /// Returns the underlying char, if [`Self::is_visible_char`] is true.
+    /// Panics otherwise.
     pub fn get_char(&self) -> char {
         match self {
             UnicodeSymbol::Char(c) => *c,

@@ -5,6 +5,11 @@ const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.t
 const NOTO_SANS_MONO_BOLD: &[u8] = include_bytes!("res/NotoSansMono-Bold.ttf");
 const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf");
 
+/// Additional horizontal padding for each rasterized character in its raster/box. All chars
+/// will be centered in that box. With this value, we can influence the spacing of the text
+/// if multiple characters are displayed side by side.
+const RASTERIZED_FONT_ADDITIONAL_PADDING: usize = 0;
+
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
     // must match order in enum FontWeightName
@@ -99,15 +104,16 @@ macro_rules! trim_index_to_bounds {
 /// All font-related information to render characters with [`fontdue`]
 /// into a bitmap font. Currently, the usage of Noto Sans Mono is hard-coded.
 ///
-/// Guarantees, that each bitmap font raster centers the letter in a vertical
-/// and horizontal way. There will be a small vertical padding to other lines
-/// (if rendered as multiline) but almost no padding to the left and right by
-/// default.
+/// Guarantees, that each font raster centers the letter in a vertical and horizontal way.
+/// It might truncate letters to the left or right, especially for wide characters, such as '�'.
+/// There will be a small vertical padding to other lines (if rendered as multiline) but almost no
+/// padding to the left and right by default. This way, letters can be displayed side by side and
+/// appear as mono-space font.
 ///
-/// The raster is not XxX but XxY, because a mono font not necessarily needs to
-/// be XxX, as long as each character has the same width.
+/// The raster is not XxX but XxY, because a mono font not necessarily needs to be XxX, as long as
+/// each character has the same width.
 #[derive(Debug)]
-pub struct ToBitmapFont {
+pub struct RasterizationInfo {
     /// See [`Font`].
     font: Font,
     /// Height of the raster for the font rasterization.
@@ -123,13 +129,13 @@ pub struct ToBitmapFont {
     widest_char: char,
 }
 
-impl ToBitmapFont {
-    /// Creates a new object, ready to rasterize characters into a bitmap.
+impl RasterizationInfo {
+    /// Creates a new object, ready to rasterize characters into a raster.
     ///
     /// # Parameters
-    /// * `raster_height` height of the bitmap. A little bit bigger than the font on the screen.
+    /// * `raster_height` height of the raster. A little bit bigger than the font on the screen.
     ///                   Values are for example 14, 16, 24,.
-    /// * `font_bytes` Raw bytes of a font file, that [`fontdue`] can parse.
+    /// * `font_bytes` Raw bytes of a font file that [`fontdue`] can parse.
     pub fn new(raster_height: usize, font_bytes: &[u8]) -> Self {
         // We need some padding at the top and the bottom of each box, because
         // of letters such as "Ä" and "y". I figured the value out just by trying
@@ -157,10 +163,11 @@ impl ToBitmapFont {
         }
     }
 
-    /// Rasterizes a char for the given [`ToBitmapFont`] object into a bitmap. Every letter in the
-    /// resulting bitmap mono font is horizontal and vertical aligned to the center. Furthermore,
-    /// the resulting mono font contains already a vertical line spacing of a few pixels, but no
-    /// padding to the left and right.
+    /// Rasterizes a char for the given [`Self`] object into a raster/box. Every letter in the
+    /// resulting mono font is horizontal and vertical aligned to the center. Furthermore,
+    /// the resulting mono font contains already a vertical line spacing of a few pixels, but
+    /// almost no padding to the left and right. This way, letters can be displayed side by side
+    /// and appear as mono-space font.
     pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
         let (metrics, fontdue_bitmap) = self.font.rasterize(c, self.font_size);
 
@@ -203,21 +210,28 @@ impl ToBitmapFont {
         letter_bitmap
     }
 
-    /// A brute force approach to find the maximum width, that a supported unicode
-    /// char will have for the given font size. This way, the width of the final
-    /// bitmap can be reduced to HEIGHT x WIDTH instead of HEIGHT x HEIGHT, which
-    /// would indicate a big space between all letters.
+    /// A brute force approach to find the maximum width, that a pre-rasterized character
+    /// will have for the given font size. This way, the width of the final raster can be reduced
+    /// to HEIGHT x WIDTH instead of HEIGHT x HEIGHT, which would result a big space between all
+    /// letters. The pre-rasterized characters will be all "monospaced" out-of-the box with
+    /// this approach.
+    ///
+    /// This function only takes ASCII letters into account. Wider symbols are ignored and later
+    /// truncated/cutted to the width.
     fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
-        SUPPORTED_UNICODE_RANGES
+        let (char, max) = SUPPORTED_UNICODE_RANGES
             .iter()
             .flat_map(|range| range.iter())
             .filter(|symbol| symbol.is_visible_char())
+            .filter(|symbol| symbol.is_normal_sized_char())
             .map(|s| s.get_char())
             // return tuple of char and rasterized width
             .map(|c| (c, font.rasterize(c, font_size).0.width))
             // look for maximum by width
             .max_by(|(_, l_width), (_, r_width)| l_width.cmp(r_width))
-            .unwrap()
+            .unwrap();
+
+        (char, max + RASTERIZED_FONT_ADDITIONAL_PADDING)
     }
 
     pub const fn raster_height(&self) -> usize {
@@ -244,7 +258,7 @@ mod tests {
 
     #[test]
     fn test_font_props() {
-        let props = ToBitmapFont::new(16, NOTO_SANS_MONO_REGULAR);
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
         println!("raster_height = {}", props.raster_height());
         println!("font_size     = {}", props.font_size());
         println!("raster_width  = {}", props.raster_width());
