@@ -443,8 +443,6 @@ fn codegen_font_weight_sub_modules(
     SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
         range
             .iter()
-            .filter(|x| x.is_visible_char())
-            .map(|x| x.get_char())
             .map(|char| (char, font.rasterize(char)))
             .for_each(|(char, raster)| {
                 writeln!(

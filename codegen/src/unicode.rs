@@ -1,26 +1,14 @@
-/// The unicode ranges that the library will support.
+use std::ops::RangeInclusive;
+
+pub use ranges::BASIC_LATIN;
+
+/// The unicode ranges that the library will support. Some unicode ranges
+/// do not include all symbols, as some are for example reserver for control
+/// sequences or have other special meaning.
 pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
-    // ASCII
-    UnicodeRange {
-        feature_name: "unicode-basic-latin",
-        begin: 0,
-        end: 0x7f,
-        default_feature: true,
-    },
-    // ÄöüË
-    UnicodeRange {
-        feature_name: "unicode-latin-1-supplement",
-        begin: 0x80,
-        end: 0xff,
-        default_feature: false,
-    },
-    // ĈĻŜ
-    UnicodeRange {
-        feature_name: "unicode-latin-extended-a",
-        begin: 0x100,
-        end: 0x17f,
-        default_feature: false,
-    },
+    ranges::BASIC_LATIN,
+    ranges::LATIN_1_SUPPLEMENT,
+    ranges::LATIN_EXTENDED_A,
     // careful: adding more results in much more file size
     /*
     UnicodeRange {
@@ -70,16 +58,11 @@ pub const SUPPORTED_UNICODE_RANGES: &[UnicodeRange] = &[
         begin: 0x25a0,
         end: 0x25ff,
         default_feature: false,
-    },*//*
-    // includes "�", i.e., the generic replacement character
-    UnicodeRange {
-        feature_name: "unicode-specials",
-        begin: 0xfff0,
-        end: 0xffff,
-        default_feature: false,
     },*/
+    ranges::SPECIALS,
 ];
 
+/// Relevant information about unicode ranges.
 #[derive(Debug, PartialEq, Eq)]
 pub struct UnicodeRange {
     // lower cash case, such as "basic-latin"
@@ -90,19 +73,32 @@ pub struct UnicodeRange {
     pub end: u32,
     // whether this unicode range is a default features
     pub default_feature: bool,
+    /// Symbols that should be ignored. For example, the "basic-latin" unicode range
+    /// contains ASCII, which contains many control characters. We want these to be skipped.
+    pub ignored_symbols: &'static [RangeInclusive<u32>],
 }
 
 impl UnicodeRange {
+    /// Returns an iterator over the range.
     pub fn iter(&self) -> UnicodeRangeIter {
         UnicodeRangeIter::<'_>::new(self)
     }
 
+    /// Returns the name of the Cargo feature for this unicode range.
     pub fn feature_name(&self) -> &'static str {
         self.feature_name
     }
+
+    /// Returns true if the symbol is in one of the specified ranges of ignored symbols.
+    fn symbol_is_ignored(&self, symbol: u32) -> bool {
+        self.ignored_symbols
+            .iter()
+            .any(|ignored_symbols| ignored_symbols.contains(&symbol))
+    }
 }
 
-/// Iterator over all characters of a unicode range.
+/// Iterator over all characters of a [`UnicodeRange`] with respect to ignored
+/// symbols.
 #[derive(Debug)]
 pub struct UnicodeRangeIter<'a> {
     range: &'a UnicodeRange,
@@ -120,75 +116,86 @@ impl<'a> UnicodeRangeIter<'a> {
 }
 
 impl<'a> Iterator for UnicodeRangeIter<'a> {
-    type Item = UnicodeSymbol;
+    type Item = char;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.counter > self.range.end {
+            return None;
+        }
+
+        // skip ignored ranges, such as control characters in between
+        while self.range.symbol_is_ignored(self.counter) {
+            self.counter += 1;
+        }
+
+        // Without this check, and if the last symbol is ignored, it might happen that
+        // this iterator returns a value out of its range.
+        if self.counter > self.range.end {
             None
         } else {
-            // The basic-latin block contains some non-displayable symbols. I take care of them
-            // here. Background: https://unicode-table.com/en/blocks/basic-latin/
-            let symbol = match self.counter {
-                // todo this whole code is not so nice...
-                // this should be moved to unicode range structs
-                0..=0x1f => UnicodeSymbol::Control,
-                0x20..=0x7e => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
-                0x7f => UnicodeSymbol::Control,
-                0x80..=0x9f => UnicodeSymbol::Control,
-                0xa0..=0xac => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
-                // soft hyphen
-                0xad => UnicodeSymbol::NonDisplayableSymbol(char::from_u32(self.counter).unwrap()),
-                0xae..=u32::MAX => UnicodeSymbol::Char(char::from_u32(self.counter).unwrap()),
-            };
+            let char = self.counter;
             self.counter += 1;
-            Some(symbol)
+            Some(char::from_u32(char).unwrap())
         }
     }
 }
 
-/// Return type for the [`UnicodeIter`] iterator.
-#[derive(Debug)]
-pub enum UnicodeSymbol {
-    // Regular, visible chars/symbols.
-    Char(char),
-    // for example U+00AD (soft hyphen)
-    NonDisplayableSymbol(char),
-    // Control sequences such as ESC and DEL.
-    Control,
-}
+mod ranges {
+    use super::*;
 
-impl UnicodeSymbol {
-    /// Returns true, if the variant is of type [`Self::Char`].
-    pub const fn is_visible_char(&self) -> bool {
-        matches!(self, Self::Char(_))
-    }
+    // ASCII etc
+    pub const BASIC_LATIN: UnicodeRange = UnicodeRange {
+        feature_name: "unicode-basic-latin",
+        begin: 0,
+        end: 0x7f,
+        default_feature: true,
+        ignored_symbols: &[
+            // control characters
+            0..=0x1f,
+            // delete control character
+            0x7f..=0x7f,
+        ],
+    };
 
-    /// Returns true if the variant is of type [`Self::Char`] and the character
-    /// is a "normal sized char". For example, `a` and `L` are normal sized chars
-    /// but `�` is not. `�` must be truncated to the left and right, so that the
-    /// whole font is indeed a mono-space font.
-    ///
-    /// From this information, the codegen project will determine the raster width
-    /// for all characters.
-    pub const fn is_normal_sized_char(&self) -> bool {
-        match self {
-            Self::Char(c) => match c {
-                // full visible ASCII range
-                '\x21'..='\x72' => true,
-                _ => false,
-            },
-            _ => false,
-        }
-    }
+    // ÄöüË
+    pub const LATIN_1_SUPPLEMENT: UnicodeRange = UnicodeRange {
+        feature_name: "unicode-latin-1-supplement",
+        begin: 0x80,
+        end: 0xff,
+        default_feature: false,
+        ignored_symbols: &[
+            // control characters
+            0x80..=0x9f,
+            // protected whitespace
+            0xa0..=0xa0,
+            // soft hyphen
+            0xad..=0xad,
+        ],
+    };
 
-    /// Returns the underlying char, if [`Self::is_visible_char`] is true.
-    /// Panics otherwise.
-    pub fn get_char(&self) -> char {
-        match self {
-            UnicodeSymbol::Char(c) => *c,
-            _ => panic!("not a char"),
-        }
-    }
+    // ĈĻŜ
+    pub const LATIN_EXTENDED_A: UnicodeRange = UnicodeRange {
+        feature_name: "unicode-latin-extended-a",
+        begin: 0x100,
+        end: 0x17f,
+        default_feature: false,
+        ignored_symbols: &[],
+    };
+
+    // includes "�", i.e., the generic replacement character
+    pub const SPECIALS: UnicodeRange = UnicodeRange {
+        feature_name: "unicode-specials",
+        begin: 0xfff0,
+        end: 0xffff,
+        default_feature: false,
+        ignored_symbols: &[
+            // in this range, we excldue everything except "�"
+            // as this is the only relevant symbol from this range
+            // that people ever will use (in the context & scope of this library)
+            0xfff0..=0xfffc,
+            0xfffe..=0xffff,
+        ],
+    };
 }
 
 #[cfg(test)]
@@ -227,36 +234,34 @@ mod tests {
         }
     }
 
-    // tests that the iterator starts at the range begin and not always at zero
+    // Tests that the iterator starts at the range begin and not always at zero.
+    // Also verify that the iterator stops at it's designated end.
     #[test]
     fn test_unicode_iter_begin_end() {
-        let mut iter1 = SUPPORTED_UNICODE_RANGES[0].iter();
-        assert_eq!(iter1.counter, 0);
-        for _ in 0..('a' as usize) {
-            iter1.next().unwrap();
-        }
-        match iter1.next().unwrap() {
-            UnicodeSymbol::Char(c) => {
-                assert_eq!(c, 'a')
-            }
-            _ => panic!(),
-        };
+        let mut iter = ranges::LATIN_1_SUPPLEMENT.iter();
+        assert!(iter.next().unwrap() as u32 >= iter.range.begin);
+        assert!((iter.next().unwrap() as u32) < ranges::LATIN_EXTENDED_A.begin);
 
-        let mut iter2 = SUPPORTED_UNICODE_RANGES[1].iter();
-        // skip cr1 control characters
-        for _ in 0..32 {
-            iter2.next().unwrap();
-        }
-        // skip symbols until copyright symbol
-        for _ in 0..9 {
-            iter2.next().unwrap();
-        }
-        match iter2.next().unwrap() {
-            UnicodeSymbol::Char(c) => {
-                assert_eq!(c, '©')
-            }
-            _ => panic!(),
-        };
+        let iter = ranges::BASIC_LATIN.iter();
+        assert_eq!('~', iter.last().unwrap());
+
+        let iter = ranges::SPECIALS.iter();
+        // this is currently a special case, where the last valid symbol is this one
+        // (also see the ignored symbols of this range)
+        assert_eq!(iter.last().unwrap(), '�');
+    }
+
+    #[test]
+    fn test_unicode_range_iter_skip_control_sequences() {
+        // ASCII code range
+        let mut iter = ranges::BASIC_LATIN.iter();
+        // first one must be space
+        assert_eq!(iter.next().unwrap(), '\x20');
+
+        // ASCII code range
+        let mut iter = ranges::SPECIALS.iter();
+        // the other symbols in this range are currently omitted
+        assert_eq!(iter.next().unwrap(), '�');
     }
 
     // Ensure that the SUPPORTED_UNICODE_RANGES field does not contain a field multiple times
@@ -270,6 +275,32 @@ mod tests {
                 .enumerate()
                 .filter(|r2| r1.0 != r2.0)
                 .for_each(|r2| assert_ne!(r1.1, r2.1))
+        })
+    }
+
+    // Ensure that the SUPPORTED_UNICODE_RANGES are in a total order.
+    #[allow(non_snake_case)]
+    #[test]
+    fn test_SUPPORTED_UNICODE_RANGES_in_order() {
+        SUPPORTED_UNICODE_RANGES
+            .iter()
+            .zip(SUPPORTED_UNICODE_RANGES.iter().skip(1))
+            .for_each(|(a, b)| {
+                assert!(a.end < b.begin);
+            })
+    }
+
+    // Ensure that the SUPPORTED_UNICODE_RANGES ignored symbols are within the boundaries
+    // of the unicode range.
+    #[allow(non_snake_case)]
+    #[test]
+    fn test_SUPPORTED_UNICODE_RANGES_ignored_symbols_in_range() {
+        SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
+            for x in range.ignored_symbols {
+                assert!(x.start() <= x.end());
+                assert!(*x.start() as u32 >= range.begin);
+                assert!(*x.end() as u32 <= range.end);
+            }
         })
     }
 }

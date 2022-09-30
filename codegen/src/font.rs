@@ -1,4 +1,3 @@
-use crate::SUPPORTED_UNICODE_RANGES;
 use fontdue::{Font, FontSettings};
 
 const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.ttf");
@@ -218,12 +217,8 @@ impl RasterizationInfo {
     /// This function only takes ASCII letters (BASIC_LATIN) into account. Wider symbols are
     /// ignored and will later be truncated/cutted to this width.
     fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
-        let (char, max) = SUPPORTED_UNICODE_RANGES
+        let (char, max) = crate::unicode::BASIC_LATIN
             .iter()
-            .flat_map(|range| range.iter())
-            .filter(|symbol| symbol.is_visible_char())
-            .filter(|symbol| symbol.is_normal_sized_char())
-            .map(|s| s.get_char())
             // return tuple of char and rasterized width
             .map(|c| (c, font.rasterize(c, font_size).0.width))
             // look for maximum by width
