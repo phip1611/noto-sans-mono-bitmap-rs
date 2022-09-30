@@ -4,19 +4,22 @@
 //! * Downloaded from: <https://fonts.google.com/noto/specimen/Noto+Sans+Mono>
 //! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
-/// The height of each rasterized character for the given font weight
-/// and size. This size corresponds to the size of the module name. The
-/// font size will be a few percent smaller, as each raster contains a
-/// small vertical padding.
+/// The constant height of each rasterized character for the given font weight
+/// and size. This size corresponds to the size of the module name. The font
+/// size will be a few percent smaller, as each raster contains a small vertical
+/// to ensure vertical alignment of multiple characters.
 #[allow(dead_code)]
 pub const RASTER_HEIGHT: usize = 14;
 
-/// The width of each rasterized character for the given font weight and
-/// size. This is a few percent less than [`RASTER_HEIGHT`], as the letters
-/// need to be close together to "look normal", i.e., no horizontal padding.
+/// The constant width of each rasterized character for the given font weight and
+/// size. This is less than [`RASTER_HEIGHT`], so that multiple letters can be print
+/// next to each other and look "nice" out-of-the-box, hence, library users do not
+/// have to perform additional alignment of characters or fill in padding.
 pub const RASTER_WIDTH: usize = 8;
 
-/// Returns the raster of the given character for font weight light and font size 12px
+/// Returns the raster of the given character for font weight light and font size 12px.
+/// Wide characters, such as '�', will be truncated in their width in order to fullfill
+/// the mono font guarantee. All characters are centered in their raster.
 #[inline]
 pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
     match c {
@@ -305,9 +308,6 @@ pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
         // letter: '~' / 0x7e
         #[cfg(feature = "unicode-basic-latin")]
         '~' => Some(include!("../res_rasterized_characters/0x7e_h14_wLight.txt")),
-        // letter: ' ' / 0xa0
-        #[cfg(feature = "unicode-latin-1-supplement")]
-        ' ' => Some(include!("../res_rasterized_characters/0xa0_h14_wLight.txt")),
         // letter: '¡' / 0xa1
         #[cfg(feature = "unicode-latin-1-supplement")]
         '¡' => Some(include!("../res_rasterized_characters/0xa1_h14_wLight.txt")),
@@ -1229,6 +1229,11 @@ pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
         #[cfg(feature = "unicode-latin-extended-a")]
         'ſ' => Some(include!(
             "../res_rasterized_characters/0x17f_h14_wLight.txt"
+        )),
+        // letter: '�' / 0xfffd
+        #[cfg(feature = "unicode-specials")]
+        '�' => Some(include!(
+            "../res_rasterized_characters/0xfffd_h14_wLight.txt"
         )),
         _ => None,
     }

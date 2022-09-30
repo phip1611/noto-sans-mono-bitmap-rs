@@ -1,25 +1,25 @@
-# v0.2.0 (2022-09-25)
+# v0.2.0 (2022-09-30)
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
 - **Breaking** Now there are only the following `RasterHeight` available: 14, 18, 22, 32
   Else, the space requirements are too big, especially, if new symbols are added in the future.
-- it's clear which unicode ranges are supported:
-  currently only `basic-latin` and `latin-1-supplement`
+- it's clear now which unicode ranges are supported:
+  check the `Cargo.toml`'s feature section
 - changed the amount and naming of modules that are offered
   - now, there is a `*_default` and `*_all` module for font-weight, raster height,
     and unicode ranges
 
-Apart from that, I investigated the impact on size. The crate size (what needs to be downladed) is
+Apart from that, I investigated the impact on size. The crate size (what needs to be downloaded) is
 relatively high. It is multiple MiB. However, after compilation, this is very small. The compiler
 reliably discards unused code paths. For example, if `basic-latin` and `latin-1-supplement` are
-used with `FontWeight::Regular` and `RasterHeight::14`, then the overhead is less than 120KiB.
+used with `FontWeight::Regular` and `RasterHeight::14`, then the overhead is less than 200KiB.
 If the full support of all currently supported font weights and raster heights is needed, this adds
 about 5 MiB to the binary.
 
-While the compiler can reliable discards unused font weights, it can not reaily discard unused
-unicode ranges. Usually, if you put a `char` in, the whole varitey of unicode ranges can be meaned.
-Thus, Rust doesn't discard unused ranges. Thus, it is recommended to only use the unicode ranges
+While the compiler can reliable discards unused font weights, it can not reliably discard unused
+unicode ranges. Usually, if you put a `char` in, the whole variety of unicode ranges can be reached.
+Thus, Rust doesn't discard unused ranges. Hence, it is recommended to only use the unicode ranges
 that you do need.
 
 # v0.1.6 (2022-09-01)

@@ -56,6 +56,7 @@ size_32 = []
 unicode-basic-latin = []
 unicode-latin-1-supplement = []
 unicode-latin-extended-a = []
+unicode-specials = []
 
 
 # default raster heights
@@ -98,6 +99,7 @@ unicode_ranges_all = [
     "unicode-basic-latin",
     "unicode-latin-1-supplement",
     "unicode-latin-extended-a",
+    "unicode-specials",
 ]
 
 
