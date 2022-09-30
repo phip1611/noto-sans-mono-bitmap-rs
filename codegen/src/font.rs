@@ -9,6 +9,8 @@ const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf")
 /// if multiple characters are displayed side by side.
 const RASTERIZED_FONT_ADDITIONAL_PADDING: usize = 0;
 
+const FONT_SIZE_TO_RASTER_HEIGHT_RATIO: f32 = 0.84;
+
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
     // must match order in enum FontWeightName
@@ -140,7 +142,7 @@ impl RasterizationInfo {
         // of letters such as "Ä" and "y". I figured the value out just by trying
         // with my "rasterize_chars_in_window" binary. It depends on the y_offset
         // in `rasterize_to_bitmap()`
-        let font_size = (raster_height as f32 * 0.84).ceil();
+        let font_size = (raster_height as f32 * FONT_SIZE_TO_RASTER_HEIGHT_RATIO).ceil();
 
         let font = Font::from_bytes(
             font_bytes,
@@ -215,7 +217,7 @@ impl RasterizationInfo {
     /// characters will be all "monospaced" out-of-the box with this approach.
     ///
     /// This function only takes ASCII letters (BASIC_LATIN) into account. Wider symbols are
-    /// ignored and will later be truncated/cutted to this width.
+    /// ignored and will later be truncated/cut to this width.
     fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
         let (char, max) = crate::unicode::BASIC_LATIN
             .iter()

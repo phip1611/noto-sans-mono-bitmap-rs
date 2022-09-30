@@ -18,9 +18,9 @@ fn select_font_size() -> RasterHeight {
     let char = line.chars().next().unwrap();
 
     match char {
-        'a' => RasterHeight::Size14,
-        'c' => RasterHeight::Size18,
-        'e' => RasterHeight::Size22,
+        'a' => RasterHeight::Size16,
+        'c' => RasterHeight::Size20,
+        'e' => RasterHeight::Size24,
         'f' => RasterHeight::Size32,
         _ => panic!()
     }

@@ -39,15 +39,15 @@
 //!
 //! // Minimal example.
 //!
-//! let width = get_raster_width(FontWeight::Regular, RasterHeight::Size14);
+//! let width = get_raster_width(FontWeight::Regular, RasterHeight::Size16);
 //! println!(
-//!     "Each char of the mono-spaced font will be {}px in width if the font \
+//!     "Each char of the monospaced font will be {}px in width if the font \
 //!      weight is {:?} and the height is {}",
 //!     width,
 //!     FontWeight::Regular,
-//!     RasterHeight::Size14.val()
+//!     RasterHeight::Size16.val()
 //! );
-//! let char_raster = get_raster('A', FontWeight::Regular, RasterHeight::Size14).expect("unsupported char");
+//! let char_raster = get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
 //! println!("{:?}", char_raster);
 //! for (row_i, row) in char_raster.raster().iter().enumerate() {
 //!     for (col_i, pixel) in row.iter().enumerate() {
@@ -165,12 +165,12 @@ impl FontWeight {
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 pub enum RasterHeight {
-    #[cfg(feature = "size_14")]
-    Size14 = 14,
-    #[cfg(feature = "size_18")]
-    Size18 = 18,
-    #[cfg(feature = "size_22")]
-    Size22 = 22,
+    #[cfg(feature = "size_16")]
+    Size16 = 16,
+    #[cfg(feature = "size_20")]
+    Size20 = 20,
+    #[cfg(feature = "size_24")]
+    Size24 = 24,
     #[cfg(feature = "size_32")]
     Size32 = 32,
 }
@@ -192,34 +192,34 @@ pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<Rast
     let raster = match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::light::size_14::get_char(c),
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::light::size_18::get_char(c),
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::light::size_22::get_char(c),
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::light::size_16::get_char(c),
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::light::size_20::get_char(c),
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::light::size_24::get_char(c),
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::light::size_32::get_char(c),
         },
         #[cfg(feature = "regular")]
         FontWeight::Regular => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::regular::size_14::get_char(c),
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::regular::size_18::get_char(c),
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::regular::size_22::get_char(c),
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::regular::size_16::get_char(c),
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::regular::size_20::get_char(c),
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::regular::size_24::get_char(c),
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::regular::size_32::get_char(c),
         },
         #[cfg(feature = "bold")]
         FontWeight::Bold => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::bold::size_14::get_char(c),
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::bold::size_18::get_char(c),
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::bold::size_22::get_char(c),
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::bold::size_16::get_char(c),
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::bold::size_20::get_char(c),
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::bold::size_24::get_char(c),
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::bold::size_32::get_char(c),
         },
@@ -240,34 +240,34 @@ pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::light::size_14::RASTER_WIDTH,
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::light::size_18::RASTER_WIDTH,
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::light::size_22::RASTER_WIDTH,
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::light::size_16::RASTER_WIDTH,
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::light::size_20::RASTER_WIDTH,
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::light::size_24::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::light::size_32::RASTER_WIDTH,
         },
         #[cfg(feature = "regular")]
         FontWeight::Regular => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::regular::size_14::RASTER_WIDTH,
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::regular::size_18::RASTER_WIDTH,
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::regular::size_22::RASTER_WIDTH,
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::regular::size_16::RASTER_WIDTH,
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::regular::size_20::RASTER_WIDTH,
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::regular::size_24::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::regular::size_32::RASTER_WIDTH,
         },
         #[cfg(feature = "bold")]
         FontWeight::Bold => match size {
-            #[cfg(feature = "size_14")]
-            RasterHeight::Size14 => crate::bold::size_14::RASTER_WIDTH,
-            #[cfg(feature = "size_18")]
-            RasterHeight::Size18 => crate::bold::size_18::RASTER_WIDTH,
-            #[cfg(feature = "size_22")]
-            RasterHeight::Size22 => crate::bold::size_22::RASTER_WIDTH,
+            #[cfg(feature = "size_16")]
+            RasterHeight::Size16 => crate::bold::size_16::RASTER_WIDTH,
+            #[cfg(feature = "size_20")]
+            RasterHeight::Size20 => crate::bold::size_20::RASTER_WIDTH,
+            #[cfg(feature = "size_24")]
+            RasterHeight::Size24 => crate::bold::size_24::RASTER_WIDTH,
             #[cfg(feature = "size_32")]
             RasterHeight::Size32 => crate::bold::size_32::RASTER_WIDTH,
         },

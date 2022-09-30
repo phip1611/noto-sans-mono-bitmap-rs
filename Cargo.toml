@@ -45,10 +45,10 @@ regular = []
 bold = []
 
 
-# all available raster heights
-size_14 = []
-size_18 = []
-size_22 = []
+# all available raster heights (the font size is ~84% of this)
+size_16 = []
+size_20 = []
+size_24 = []
 size_32 = []
 
 
@@ -61,15 +61,15 @@ unicode-specials = []
 
 # default raster heights
 raster_heights_default = [
-    "size_14",
+    "size_16",
 ]
 
 
 # feature that combines all raster heights
 raster_heights_all = [
-    "size_14",
-    "size_18",
-    "size_22",
+    "size_16",
+    "size_20",
+    "size_24",
     "size_32",
 ]
 

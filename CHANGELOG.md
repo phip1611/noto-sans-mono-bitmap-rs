@@ -2,7 +2,7 @@
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
-- **Breaking** Now there are only the following `RasterHeight` available: 14, 18, 22, 32
+- **Breaking** Now there are only the following `RasterHeight` available: 16, 20, 24, 32
   Else, the space requirements are too big, especially, if new symbols are added in the future.
 - it's clear now which unicode ranges are supported:
   check the `Cargo.toml`'s feature section
@@ -10,7 +10,7 @@
   - now, there is a `*_default` and `*_all` module for font-weight, raster height,
     and unicode ranges
 
-Apart from that, I investigated the impact on size. The crate size (what needs to be downloaded) is
+Furthermore, I investigated the impact on size. The crate size (what needs to be downloaded) is
 relatively high. It is multiple MiB. However, after compilation, this is very small. The compiler
 reliably discards unused code paths. For example, if `basic-latin` and `latin-1-supplement` are
 used with `FontWeight::Regular` and `RasterHeight::14`, then the overhead is less than 200KiB.

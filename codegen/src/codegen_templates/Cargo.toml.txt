@@ -42,7 +42,7 @@ all = ["raster_heights_all", "font_weights_all", "unicode_ranges_all"]
 # all available font weights
 # %CODEGEN_FONT_WEIGHTS%
 
-# all available raster heights
+# all available raster heights (the font size is ~84% of this)
 # %CODEGEN_FONT_SIZES%
 
 # all available unicode ranges
