@@ -1,9 +1,9 @@
-# v0.2.0 (2022-09-30)
+# v0.2.0 (2022-10-xx)
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
-- **Breaking** Now there are only the following `RasterHeight` available: 16, 20, 24, 32
-  Else, the space requirements are too big, especially, if new symbols are added in the future.
+- **Breaking** Now there are only the following `RasterHeight` available: 16, 20, 24, 32.
+  Otherwise the space requirements are too big, especially, if new symbols are added in the future.
 - it's clear now which unicode ranges are supported:
   check the `Cargo.toml`'s feature section
 - changed the amount and naming of modules that are offered
@@ -18,9 +18,9 @@ If the full support of all currently supported font weights and raster heights i
 about 5 MiB to the binary.
 
 While the compiler can reliable discards unused font weights, it can not reliably discard unused
-unicode ranges. Usually, if you put a `char` in, the whole variety of unicode ranges can be reached.
-Thus, Rust doesn't discard unused ranges. Hence, it is recommended to only use the unicode ranges
-that you do need.
+unicode ranges. Usually, if you pass a `char` to `get_raster`, the whole variety of unicode ranges
+can be reached. Thus, Rust doesn't discard unused ranges. Hence, it is recommended to only select
+the unicode ranges that you do need.
 
 # v0.1.6 (2022-09-01)
 - add the "■" character (U+25A0; [Geometric Shapes](https://jrgraphix.net/r/Unicode/25A0-25FF))
