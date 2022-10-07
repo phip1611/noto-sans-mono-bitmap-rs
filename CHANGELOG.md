@@ -1,4 +1,4 @@
-# v0.2.0 (2022-10-xx)
+# v0.2.0 (2022-10-07)
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
