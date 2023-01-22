@@ -30,8 +30,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - run: sudo apt update && sudo apt install libxkbcommon-dev -y
-      - name: Build
-        run: cargo build --verbose --features all
+      - name: Build with default features
+        run: cargo build --verbose --all-targets
+      - name: Build with all features
+        run: cargo build --verbose --features all --all-targets
         # the library itself has no tests but the codegen project has tests
         # so effectively, this is useless
       - name: Run tests
