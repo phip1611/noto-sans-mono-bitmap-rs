@@ -108,5 +108,6 @@ unicode_ranges_all = [
 
 
 [dev-dependencies]
-minifb = "0.23.0"
+# Pinned as long as MSRV is 1.56.1
+minifb = "=0.22.0"
 

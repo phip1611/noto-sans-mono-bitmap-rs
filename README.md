@@ -84,6 +84,11 @@ crate.
 ## Quick Demo
 `$ cargo run --example show_chars_in_window`
 
+If you want to use special chars, such as `{ä, ö, ü, �}`, in the example,
+you can use
+
+`$ cargo run --example show_chars_in_window --features all`
+
 ## Build Prerequisites
 Because the examples uses `minifb` as dependency, on Linux the package `libxkbcommon-dev` is required
 to run them. This is not necessary, if you just use this crate as dependency.
