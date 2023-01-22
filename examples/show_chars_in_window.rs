@@ -5,9 +5,9 @@ use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeig
 // the pre-rendered bitmap font.
 fn main() {
     // letters we want to print
-    let msg = "Abc �äöü! Hello world!";
-    let font_weight = FontWeight::Light;
-    let raster_height = RasterHeight::Size32;
+    let msg = "Abc Hello world 123!";
+    let font_weight = FontWeight::Regular;
+    let raster_height = RasterHeight::Size16;
     let buffer_height = raster_height.val();
     let char_width = get_raster_width(font_weight, raster_height);
     let buffer_width = char_width * msg.chars().count();
