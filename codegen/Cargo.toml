@@ -20,4 +20,5 @@ opt-level = 1
 [dependencies]
 fontdue = { version = "0.7.2", features = ["parallel", "simd"] }
 minifb = "0.23.0"
+ttf-parser = "0.20.0"
 
