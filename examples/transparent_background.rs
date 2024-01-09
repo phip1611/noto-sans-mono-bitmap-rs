@@ -43,7 +43,7 @@ fn draw_string(
     y: u32,
     font_weight: FontWeight,
     raster_height: RasterHeight,
-    draw_buffer: &mut Vec<u32>,
+    draw_buffer: &mut [u32],
 ) {
     for (char_i, char) in msg.chars().enumerate() {
         let char_raster = get_raster(char, font_weight, raster_height).expect("unknown char");

@@ -36,7 +36,6 @@ fn main() {
     }
 }
 
-
 fn print_msg(line: usize, buffer_width: usize, draw_buffer: &mut [u32]) {
     for (char_i, char) in MSG.chars().enumerate() {
         let char_raster = get_raster(char, FONT_WEIGHT, RASTER_HEIGHT).expect("unknown char");
@@ -47,7 +46,8 @@ fn print_msg(line: usize, buffer_width: usize, draw_buffer: &mut [u32]) {
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
                 let rgb_32 = /*0 << 24 | */r << 16 | g << 8 | b;
 
-                let index = char_i * char_raster.width() + col_i + (line_offset + row_i) * buffer_width;
+                let index =
+                    char_i * char_raster.width() + col_i + (line_offset + row_i) * buffer_width;
 
                 draw_buffer[index] = rgb_32;
             }
