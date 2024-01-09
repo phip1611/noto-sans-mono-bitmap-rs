@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> { } }:
 pkgs.mkShell rec {
-  nativeBuildInputs = with pkgs; [
+  packages = with pkgs; [
   ];
 
   buildInputs = with pkgs; [
