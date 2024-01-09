@@ -15,9 +15,9 @@ pub const RASTER_HEIGHT: usize = 32;
 /// size. This is less than [`RASTER_HEIGHT`], so that multiple letters can be print
 /// next to each other and look "nice" out-of-the-box, hence, library users do not
 /// have to perform additional alignment of characters or fill in padding.
-pub const RASTER_WIDTH: usize = 17;
+pub const RASTER_WIDTH: usize = 14;
 
-/// Returns the raster of the given character for font weight bold and font size 27px.
+/// Returns the raster of the given character for font weight bold and font size 23px.
 /// Wide characters, such as '�', will be truncated in their width in order to fullfill
 /// the mono font guarantee. All characters are centered in their raster.
 #[inline]
