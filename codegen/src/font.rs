@@ -195,7 +195,7 @@ impl RasterizationInfo {
         // align to vertical center
         let y_offset = ((font_size - metrics.height as f32) - metrics.ymin as f32).round() as isize;
 
-        for ((y, x), intensity) in fontdue_bitmap
+        for ((y, x), intensity, skip) in fontdue_bitmap
             .iter()
             .enumerate()
             .map(|(i, p)| (i as isize, p))
@@ -203,14 +203,18 @@ impl RasterizationInfo {
                 let x = x_offset + (i % metrics.width as isize);
                 let y = y_offset + (i / metrics.width as isize);
 
+                let skip = x >= self.raster_width as isize || y >= self.raster_height as isize;
+
                 // if some letter is "too" big and out of bounds the box: cut and prevent error
                 let x = trim_index_to_bounds!(x, self.raster_width());
                 let y = trim_index_to_bounds!(y, self.raster_height());
 
-                ((y, x), *p)
+                ((y, x), *p, skip)
             })
         {
+            if !skip {
             letter_bitmap[y][x] = intensity;
+            }
         }
 
         letter_bitmap
