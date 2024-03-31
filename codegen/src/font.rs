@@ -181,39 +181,40 @@ impl RasterizationInfo {
     /// almost no padding to the left and right. This way, letters can be displayed side by side
     /// and appear as mono-space font.
     pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
-        let (metrics, fontdue_bitmap) = self.font.rasterize(c, self.font_size);
+        let font_size = self.font_size;
+        let (metrics, fontdue_bitmap) = self.font.rasterize(c, font_size);
 
         // the bitmap that will contain the properly aligned rasterized char
         let mut letter_bitmap = vec![vec![0_u8; self.raster_width]; self.raster_height];
 
-        for ((y, x), intensity) in fontdue_bitmap
+        // align to horizontal center
+        let x_offset = (metrics.xmin as f32
+            + (self.raster_width as f32 - metrics.advance_width as f32) / 2.0)
+            .floor() as isize;
+
+        // align to vertical center
+        let y_offset = ((font_size - metrics.height as f32) - metrics.ymin as f32).round() as isize;
+
+        for ((y, x), intensity, skip) in fontdue_bitmap
             .iter()
             .enumerate()
             .map(|(i, p)| (i as isize, p))
             .map(|(i, p)| {
-                // align to horizontal center
-                let x_offset = metrics.xmin as isize;
+                let x = x_offset + (i % metrics.width as isize);
+                let y = y_offset + (i / metrics.width as isize);
 
-                // align to vertical center
-                // 1) bounds:height: align big letters to groundline regarding the font size
-                let mut y_offset = self.font_size as isize - metrics.height as isize;
-                // 2) move downwards, because there are parts "below the ground line"  (like in y)
-                y_offset -= metrics.ymin as isize;
-
-                let x = i % metrics.width as isize;
-                let y = i as isize / metrics.width as isize;
-
-                let x = x + x_offset;
-                let y = y + y_offset;
+                let skip = x >= self.raster_width as isize || y >= self.raster_height as isize;
 
                 // if some letter is "too" big and out of bounds the box: cut and prevent error
                 let x = trim_index_to_bounds!(x, self.raster_width());
                 let y = trim_index_to_bounds!(y, self.raster_height());
 
-                ((y, x), *p)
+                ((y, x), *p, skip)
             })
         {
+            if !skip {
             letter_bitmap[y][x] = intensity;
+            }
         }
 
         letter_bitmap
