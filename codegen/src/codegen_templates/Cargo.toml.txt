@@ -9,8 +9,8 @@ point operations. Useful in kernels and bootloaders when only "soft-float" is av
 speaking, this crate is more than a basic bitmap font, because it encodes each pixel as a byte
 and not as a bit, which results in a much nicer result on the screen.
 """
-version = "0.2.0"
-edition = "2018"
+version = "0.3.0"
+edition = "2021"
 keywords = ["bitmap", "font", "noto-sans-mono"]
 categories = ["text-processing", "no-std"]
 readme = "README.md"
