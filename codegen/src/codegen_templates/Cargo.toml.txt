@@ -75,4 +75,4 @@ all = ["raster_heights_all", "font_weights_all", "unicode_ranges_all"]
 
 
 [dev-dependencies]
-minifb = "0.23.0"
+minifb = "~0.25.0"
