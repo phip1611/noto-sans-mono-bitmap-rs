@@ -2,22 +2,23 @@ use minifb::{Key, Window, WindowOptions};
 use noto_sans_mono_bitmap::{get_raster, FontWeight, RasterHeight};
 
 const WIDTH: usize = 800;
-const HEIGH: usize = 600;
-const NUM_PIXELS: usize = HEIGH * WIDTH;
+const HEIGHT: usize = 600;
+const NUM_PIXELS: usize = HEIGHT * WIDTH;
 
-//This example draws some text approximately in the middle of the window
-//The background colour of the pixels is taken into account to so that the text is effecitvely drawn with no solid background
+// This example draws some text approximately in the middle of the window
+// The background colour of the pixels is taken into account to so that the text is effectively
+// drawn with no solid background
 
 fn main() {
     let mut draw_buffer = vec![0; NUM_PIXELS];
 
     let mut window =
-        Window::new("Test - ESC to exit", WIDTH, HEIGH, WindowOptions::default()).unwrap();
+        Window::new("Test - ESC to exit", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
 
-    let fill_colour = (60 << 16) + (60 << 8) + 60; //This is a nice grey colour
+    let fill_colour = (60 << 16) + (60 << 8) + 60; // This is a nice grey colour
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        //Clear the window by filling the buffer with the fill colour
+        // Clear the window by filling the buffer with the fill colour
         draw_buffer[0..NUM_PIXELS].fill(fill_colour);
 
         let msg = "Hello World";
@@ -32,7 +33,7 @@ fn main() {
 
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
         window
-            .update_with_buffer(&draw_buffer, WIDTH, HEIGH)
+            .update_with_buffer(&draw_buffer, WIDTH, HEIGHT)
             .unwrap();
     }
 }

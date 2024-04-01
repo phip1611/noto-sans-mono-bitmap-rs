@@ -18,7 +18,7 @@ pub const RASTER_HEIGHT: usize = 20;
 pub const RASTER_WIDTH: usize = 9;
 
 /// Returns the raster of the given character for font weight bold and font size 14px.
-/// Wide characters, such as '�', will be truncated in their width in order to fullfill
+/// Wide characters, such as '�', will be truncated in their width in order to fulfill
 /// the mono font guarantee. All characters are centered in their raster.
 #[inline]
 pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {
