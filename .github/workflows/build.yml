@@ -1,0 +1,89 @@
+name: Build crate
+
+on:
+  merge_group:
+  pull_request:
+  push:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check_msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.56.1 # MSRV for library consumers
+      - name: Build Lib as Dependency with MSRV
+        run: cd ttfb-lib-msrv-check && cargo check --all-targets --verbose
+
+  # this only tests the generated project that was checked in but not the
+  # codegen project itself
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ macos-latest, ubuntu-latest, windows-latest ]
+        rust: [ stable, nightly ]
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ matrix.runs-on }}-${{ matrix.rust }}"
+      - name: cargo check (debug)
+        run: cargo check --all-targets --features all --verbose
+      - name: cargo check (release)
+        run: cargo check --all-targets --features all --verbose --release
+      - name: cargo build (debug)
+        run: cargo build --all-targets --features all --verbose
+      - name: cargo build (release)
+        run: cargo build --all-targets --features all --verbose --release
+      - run: cargo test --features all --verbose
+
+  # this only tests the generated project that was checked in but not the
+  # codegen project itself
+  build_no_std:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [ stable, nightly ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: "${{ matrix.runs-on }}-${{ matrix.rust }}"
+      - name: "Rustup: install some no_std target"
+        run: rustup target add thumbv7em-none-eabihf
+      - name: Build (no_std)
+        run: cargo build --target thumbv7em-none-eabihf --features all
+
+  codestyle:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [ stable, nightly ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Rustfmt
+        run: cargo fmt -- --check
+      - name: Clippy
+        run: cargo clippy --features all
+      - name: Rustdoc
+        run: cargo doc --features all --document-private-items --no-deps

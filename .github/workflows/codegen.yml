@@ -1,4 +1,4 @@
-name: Build
+name: Check codegen
 
 on:
   merge_group:
@@ -9,6 +9,18 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  check-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@#
+        with:
+          profile: default
+          toolchain: 1.56.1 # MSRV
+          override: true
+      - run: cd codegen/msrv-check
+      - run: cargo check --verbose --all-targets --features all
+
   # this only tests the generated project that was checked in but not the
   # codegen project itself
   build:
@@ -18,11 +30,8 @@ jobs:
         rust:
           - stable
           - nightly
-          - 1.56.1 # MSVR
     steps:
       - uses: actions/checkout@v2
-      # Important preparation step: override the latest default Rust version in GitHub CI
-      # with the current value of the iteration in the "strategy.matrix.rust"-array.
       - uses: actions-rs/toolchain@v1
         with:
           profile: default
@@ -47,7 +56,6 @@ jobs:
         rust:
           - stable
           - nightly
-          - 1.56.1 # MSVR
     steps:
       - uses: actions/checkout@v2
       # Important preparation step: override the latest default Rust version in GitHub CI
