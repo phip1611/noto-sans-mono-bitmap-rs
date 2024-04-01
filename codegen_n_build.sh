@@ -26,5 +26,5 @@ cargo fmt
 # don't use "--all-targets" here; seems like it tests all other targets and not the lib
 cargo test --features all
 cargo clippy --features all  --all-targets
-cargo doc --features all
+cargo doc --features all --document-private-items --no-deps
 cargo build --features all --all-targets
