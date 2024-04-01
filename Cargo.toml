@@ -20,11 +20,12 @@ repository = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
 documentation = "https://docs.rs/noto-sans-mono-bitmap"
 
 exclude = [
+    ".direnv",
+    ".github",
     ".editorconfig",
-    "check-size",
-    "codegen_n_build.sh",
-    "CODEGEN.md",
-    "examples",
+    ".envrc",
+    "/external",
+    "shell.nix",
 ]
 
 [[example]]
