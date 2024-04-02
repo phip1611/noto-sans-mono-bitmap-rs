@@ -112,5 +112,5 @@ Thanks to the original author(s)!
 ## License
 See LICENSE file in repository.
 
-## MSRV
-Rust stable 1.52.1.
+## MSRV (for library consumers)
+Rust stable 1.56.1.
