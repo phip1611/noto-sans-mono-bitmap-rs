@@ -1,3 +1,5 @@
+# Checks that the codegen helper generates the exact same sources that are
+# currently checked.
 name: Check codegen
 
 on: [ merge_group, push, pull_request ]
@@ -6,8 +8,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # Check that the codegen helper generates the exact same sources that are
-  # currently checked in.
   check_codegen:
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +16,22 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: 1.56.1 # MSRV for library consumers
+          components: rustfmt
       - name: generate crate
-        run: ./codegen_n_build.sh
+        run: ./codegen_n_build.sh --skip-checks
       - name: check diff crate
         run: git diff --quiet
+
+  codestyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - run: cd codegen
+      - name: Rustfmt
+        run: cargo fmt -- --check
+      - name: Clippy
+        run: cargo clippy --features all

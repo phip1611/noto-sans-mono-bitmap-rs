@@ -12,8 +12,13 @@ const NUM_PIXELS: usize = HEIGHT * WIDTH;
 fn main() {
     let mut draw_buffer = vec![0; NUM_PIXELS];
 
-    let mut window =
-        Window::new("Test - ESC to exit", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
+    let mut window = Window::new(
+        "Test - ESC to exit",
+        WIDTH,
+        HEIGHT,
+        WindowOptions::default(),
+    )
+    .unwrap();
 
     let fill_colour = (60 << 16) + (60 << 8) + 60; // This is a nice grey colour
 

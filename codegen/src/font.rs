@@ -213,7 +213,7 @@ impl RasterizationInfo {
             })
         {
             if !skip {
-            letter_bitmap[y][x] = intensity;
+                letter_bitmap[y][x] = intensity;
             }
         }
 
