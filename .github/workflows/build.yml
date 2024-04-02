@@ -1,9 +1,7 @@
+# This tests the generated crate.
 name: Build crate
 
-on:
-  merge_group:
-  pull_request:
-  push:
+on: [ merge_group, push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,8 +18,6 @@ jobs:
       - name: Build Lib as Dependency with MSRV
         run: cd external/check-msrv && cargo check --all-targets --verbose
 
-  # this only tests the generated project that was checked in but not the
-  # codegen project itself
   build:
     strategy:
       fail-fast: false
@@ -48,8 +44,6 @@ jobs:
         run: cargo build --all-targets --features all --verbose --release
       - run: cargo test --features all --verbose
 
-  # this only tests the generated project that was checked in but not the
-  # codegen project itself
   build_no_std:
     runs-on: ubuntu-latest
     strategy:
