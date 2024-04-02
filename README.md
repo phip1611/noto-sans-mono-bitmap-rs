@@ -98,7 +98,8 @@ you can use
 - _The replacement character `�` is cut off on the left and right._: \
    Yes and I can't do much about it. It seems as this symbol doesn't come from
    the font but from the rasterization library. However, I didn't spend too
-   much time into the investigation.
+   much time into the investigation. More details can be found on
+   [GitHub](https://github.com/phip1611/noto-sans-mono-bitmap-rs/pull/17).
 - _The line height is so high._ \
   Yes and I can't do anything about it. I get the line height from the TTF font
   and if I don't respect this value, certain characters will be cut off. I'm not
