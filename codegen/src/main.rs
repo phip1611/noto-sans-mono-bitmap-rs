@@ -38,7 +38,7 @@ fn main() {
     // debugging info
     {
         let font =
-            RasterizationInfo::new(20 as usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
+            RasterizationInfo::new(20_usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
         println!("INFO: The widest char is '{}'", font.widest_char());
     }
 

@@ -95,7 +95,6 @@ you can use
 `$ cargo run --example show_chars_in_window --features all`
 
 ## Limitations & FAQ
-
 - _The replacement character `�` is cut off on the left and right._: \
    Yes and I can't do much about it. It seems as this symbol doesn't come from
    the font but from the rasterization library. However, I didn't spend too
@@ -104,6 +103,8 @@ you can use
   Yes and I can't do anything about it. I get the line height from the TTF font
   and if I don't respect this value, certain characters will be cut off. I'm not
   an expert in font rendering. But for what it is, it is good enough.
+  However, if you render the font into a framebuffer, you can cut of 1-2px on
+  the top and one on the bottom, which should be fine for normal ASCII.
 
 ## Trivia
 The rasterization was done with the awesome [fontdue-Crate](https://crates.io/crates/fontdue).
