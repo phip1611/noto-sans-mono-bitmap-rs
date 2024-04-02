@@ -18,7 +18,7 @@ jobs:
         with:
           toolchain: 1.56.1 # MSRV for library consumers
       - name: Build Lib as Dependency with MSRV
-        run: cd ttfb-lib-msrv-check && cargo check --all-targets --verbose
+        run: cd external/check-msrv && cargo check --all-targets --verbose
 
   # this only tests the generated project that was checked in but not the
   # codegen project itself
