@@ -467,7 +467,7 @@ fn codegen_font_weight_sub_modules(
                     rust_raster_source_code.as_bytes(),
                     Context {
                         c: char,
-                        weight: weight.clone(),
+                        weight: *weight,
                         height: font.raster_height() as u32,
                     },
                 );
