@@ -44,15 +44,15 @@ impl FontWeight {
         }
     }
 
-    pub fn name(&self) -> &FontWeightName {
+    pub const fn name(&self) -> &FontWeightName {
         &self.name
     }
 
-    pub fn mod_name(&self) -> &str {
+    pub const fn mod_name(&self) -> &str {
         self.name.mod_name()
     }
 
-    pub fn default_feature(&self) -> bool {
+    pub const fn default_feature(&self) -> bool {
         self.default_feature
     }
 }
@@ -189,7 +189,7 @@ impl RasterizationInfo {
 
         // align to horizontal center
         let x_offset = (metrics.xmin as f32
-            + (self.raster_width as f32 - metrics.advance_width as f32) / 2.0)
+            + (self.raster_width as f32 - metrics.advance_width) / 2.0)
             .floor() as isize;
 
         // align to vertical center
@@ -213,7 +213,7 @@ impl RasterizationInfo {
             })
         {
             if !skip {
-            letter_bitmap[y][x] = intensity;
+                letter_bitmap[y][x] = intensity;
             }
         }
 

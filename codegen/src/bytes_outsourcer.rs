@@ -15,7 +15,7 @@ pub struct BytesToFileOutsourcer {
 }
 
 impl BytesToFileOutsourcer {
-    pub fn new(out_dir: &'static str) -> Self {
+    pub const fn new(out_dir: &'static str) -> Self {
         Self { out_dir }
     }
 
@@ -70,7 +70,7 @@ mod tests {
     fn test_bytes_outsourcer() {
         let mut outsourcer = BytesToFileOutsourcer::new("target");
         let path = outsourcer.outsource_bytes(
-            "hello world".as_bytes(),
+            b"hello world",
             Context {
                 c: 'a',
                 weight: FontWeight::new(FontWeightName::Regular, false),

@@ -1,8 +1,10 @@
 use noto_sans_mono_bitmap::{RasterHeight, FontWeight};
 
-// small program that uses the library and ensures that the compiled doesn't throw anything away.
-// Thus, the library is definetely used and all code paths (=all input charactes) are valid.
-// This way, I can determine the total usage in size.
+// Small program that uses the library and ensures that the compiler doesn't
+// throw anything away that should be there.
+// Thus, the library is definitely used and all inputs/all expected paths are
+// possible during runtime. This way, we can determine the total size when
+// compiled.
 fn main() {
     let mut line = String::new();
     let _ = std::io::stdin().read_line(&mut line);

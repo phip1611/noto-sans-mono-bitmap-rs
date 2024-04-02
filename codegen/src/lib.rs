@@ -66,7 +66,7 @@ impl RasterHeight {
         format!("size_{}", self.value)
     }
 
-    pub fn default_feature(&self) -> bool {
+    pub const fn default_feature(&self) -> bool {
         self.default_feature
     }
 }
