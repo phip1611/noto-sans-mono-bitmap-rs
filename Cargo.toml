@@ -18,6 +18,7 @@ license = "MIT"
 homepage = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
 repository = "https://github.com/phip1611/noto-sans-mono-bitmap-rs"
 documentation = "https://docs.rs/noto-sans-mono-bitmap"
+rust-version = "1.56.1" # MSRV for library consumers
 
 exclude = [
     ".direnv",
