@@ -1,3 +1,17 @@
+# v0.3.0 (2024-04-xx)
+- Improved alignment of characters in a line. As a consequence, they are now
+  slightly smaller. The correct line height to font size ratio is about 0.75 
+  rather than the previous 0.84. A lot of thanks to 
+  [toothbrush7777777](https://github.com/toothbrush7777777) for their
+  contribution!
+- The replacement character `�` is cut off on the left and right. There is no
+  better solution at this point. However, other programs, such as Jetbrains 
+  IDEs also cut it off in some scenarios (depending on font and other 
+  properties), so this should be okay. (I'm not 100% sure yet, but I think this
+  letter is not part of the noto-sans-mono font, so we only can get it from the
+  font rendering lib, which uses different metrics.)
+- Some internal code improvements
+
 # v0.2.0 (2022-10-07)
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`

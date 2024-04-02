@@ -38,7 +38,7 @@ fn main() {
     // debugging info
     {
         let font =
-            RasterizationInfo::new(20 as usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
+            RasterizationInfo::new(20_usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
         println!("INFO: The widest char is '{}'", font.widest_char());
     }
 
@@ -422,7 +422,7 @@ fn codegen_font_weight_sub_modules(
         writeln!(
             &mut code_range_string,
             "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
-            /// Wide characters, such as '�', will be truncated in their width in order to fullfill\n\
+            /// Wide characters, such as '�', will be truncated in their width in order to fulfill\n\
             /// the mono font guarantee. All characters are centered in their raster.",
             weight.mod_name(),
             font.font_size().round()
@@ -467,7 +467,7 @@ fn codegen_font_weight_sub_modules(
                     rust_raster_source_code.as_bytes(),
                     Context {
                         c: char,
-                        weight: weight.clone(),
+                        weight: *weight,
                         height: font.raster_height() as u32,
                     },
                 );

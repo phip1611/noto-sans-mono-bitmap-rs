@@ -9,8 +9,6 @@ const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf")
 /// if multiple characters are displayed side by side.
 const RASTERIZED_FONT_ADDITIONAL_PADDING: usize = 0;
 
-const FONT_SIZE_TO_RASTER_HEIGHT_RATIO: f32 = 0.84;
-
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
     // must match order in enum FontWeightName
@@ -46,15 +44,15 @@ impl FontWeight {
         }
     }
 
-    pub fn name(&self) -> &FontWeightName {
+    pub const fn name(&self) -> &FontWeightName {
         &self.name
     }
 
-    pub fn mod_name(&self) -> &str {
+    pub const fn mod_name(&self) -> &str {
         self.name.mod_name()
     }
 
-    pub fn default_feature(&self) -> bool {
+    pub const fn default_feature(&self) -> bool {
         self.default_feature
     }
 }
@@ -138,11 +136,24 @@ impl RasterizationInfo {
     ///                   Values are for example 14, 16, 24,.
     /// * `font_bytes` Raw bytes of a font file that [`fontdue`] can parse.
     pub fn new(raster_height: usize, font_bytes: &[u8]) -> Self {
-        // We need some padding at the top and the bottom of each box, because
-        // of letters such as "Ä" and "y". I figured the value out just by trying
-        // with my "rasterize_chars_in_window" binary. It depends on the y_offset
-        // in `rasterize_to_bitmap()`
-        let font_size = (raster_height as f32 * FONT_SIZE_TO_RASTER_HEIGHT_RATIO).ceil();
+        let line_height = raster_height as f32;
+
+        // Work out the ratio between the raster_height (e.g. 16) and the line height
+        // with ascenders and descenders (e.g. 23).
+        let font_size_to_raster_height_ratio = line_height / {
+            // Get font metrics.
+            let font_face = ttf_parser::Face::parse(font_bytes, 0).unwrap();
+            let ascender = font_face.ascender() as i32;
+            let descender = font_face.descender() as i32;
+            let line_gap = font_face.line_gap() as i32;
+            let units_per_em = font_face.units_per_em() as f32;
+            let scale = line_height / units_per_em;
+            // Get line height plus ascenders and descenders.
+            (ascender - descender + line_gap) as f32 * scale
+        };
+
+        // Work out the font size that fits text inside the raster_height.
+        let font_size = (line_height * font_size_to_raster_height_ratio).floor();
 
         let font = Font::from_bytes(
             font_bytes,
@@ -170,42 +181,40 @@ impl RasterizationInfo {
     /// almost no padding to the left and right. This way, letters can be displayed side by side
     /// and appear as mono-space font.
     pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
-        let (metrics, fontdue_bitmap) = self.font.rasterize(c, self.font_size);
+        let font_size = self.font_size;
+        let (metrics, fontdue_bitmap) = self.font.rasterize(c, font_size);
 
         // the bitmap that will contain the properly aligned rasterized char
         let mut letter_bitmap = vec![vec![0_u8; self.raster_width]; self.raster_height];
 
-        for ((y, x), intensity) in fontdue_bitmap
+        // align to horizontal center
+        let x_offset = (metrics.xmin as f32
+            + (self.raster_width as f32 - metrics.advance_width) / 2.0)
+            .floor() as isize;
+
+        // align to vertical center
+        let y_offset = ((font_size - metrics.height as f32) - metrics.ymin as f32).round() as isize;
+
+        for ((y, x), intensity, skip) in fontdue_bitmap
             .iter()
             .enumerate()
             .map(|(i, p)| (i as isize, p))
             .map(|(i, p)| {
-                // align to horizontal center
-                let x_offset = (self.raster_width as isize - metrics.width as isize) / 2;
+                let x = x_offset + (i % metrics.width as isize);
+                let y = y_offset + (i / metrics.width as isize);
 
-                // align to vertical center
-                // 1) bounds:height: align big letters to groundline regarding the font size
-                let mut y_offset = self.font_size as isize - metrics.height as isize;
-                // 2) move downwards, because there are parts "below the ground line"  (like in y)
-                y_offset -= metrics.ymin as isize;
-                // 3) move everything slightly to the top; I figured this out by trying with
-                //    my "rasterize_chars_in_window" binary
-                y_offset -= (self.raster_height as f32 * 0.07) as isize;
-
-                let x = i % metrics.width as isize;
-                let y = i as isize / metrics.width as isize;
-
-                let x = x + x_offset;
-                let y = y + y_offset;
+                let skip = x >= self.raster_width as isize || y >= self.raster_height as isize;
 
                 // if some letter is "too" big and out of bounds the box: cut and prevent error
                 let x = trim_index_to_bounds!(x, self.raster_width());
                 let y = trim_index_to_bounds!(y, self.raster_height());
 
-                ((y, x), p)
+                ((y, x), *p, skip)
             })
         {
-            letter_bitmap[y][x] = *intensity;
+            if !skip {
+                letter_bitmap[y][x] = intensity;
+            }
         }
 
         letter_bitmap

@@ -6,7 +6,7 @@ use minifb::{Key, Window, WindowOptions};
 
 fn main() {
     // letters we want to print
-    let msg = "ÄyA-#+`?ß§";
+    let msg = "ÄyA-#+`?ß§qg";
 
     let font_bytes = include_bytes!("../res/NotoSansMono-Regular.ttf") as &[u8];
 

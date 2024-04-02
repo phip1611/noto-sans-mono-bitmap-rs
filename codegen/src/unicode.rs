@@ -80,12 +80,12 @@ pub struct UnicodeRange {
 
 impl UnicodeRange {
     /// Returns an iterator over the range.
-    pub fn iter(&self) -> UnicodeRangeIter {
+    pub const fn iter(&self) -> UnicodeRangeIter {
         UnicodeRangeIter::<'_>::new(self)
     }
 
     /// Returns the name of the Cargo feature for this unicode range.
-    pub fn feature_name(&self) -> &'static str {
+    pub const fn feature_name(&self) -> &'static str {
         self.feature_name
     }
 
@@ -107,7 +107,7 @@ pub struct UnicodeRangeIter<'a> {
 }
 
 impl<'a> UnicodeRangeIter<'a> {
-    fn new(range: &'a UnicodeRange) -> Self {
+    const fn new(range: &'a UnicodeRange) -> Self {
         Self {
             range,
             counter: range.begin,
@@ -298,8 +298,8 @@ mod tests {
         SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
             for x in range.ignored_symbols {
                 assert!(x.start() <= x.end());
-                assert!(*x.start() as u32 >= range.begin);
-                assert!(*x.end() as u32 <= range.end);
+                assert!(*x.start() >= range.begin);
+                assert!(*x.end() <= range.end);
             }
         })
     }
