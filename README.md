@@ -62,7 +62,7 @@ fn main() {
     let char_raster =
         get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
     println!("{:?}", char_raster);
-    for (row_i, row) in char_raster.bitmap().iter().enumerate() {
+    for (row_i, row) in char_raster.raster().iter().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {
             println!("[{:02}][{:02}]: {:03}", row_i, col_i, pixel);
         }
