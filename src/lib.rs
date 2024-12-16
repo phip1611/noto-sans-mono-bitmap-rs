@@ -107,10 +107,12 @@ impl FontWeight {
     }
 }
 
-/// The height of the pre-rasterized font. The font size will be a a few
-/// percent less, because each letter contains vertical padding for proper
-/// alignment of chars (i.e. ÄyA). The width of each character will be also
-/// less than the height, because there is no horizontal padding included.
+/// The height of the pre-rasterized font.
+///
+/// The font size will be a few percent less, because each letter contains
+/// vertical padding for proper alignment of chars (i.e. ÄyA). The width of
+/// each character will be also less than the height, because there is no
+/// horizontal padding included.
 ///
 /// The available variants depend on the selected Cargo build features.
 #[derive(Debug, Clone, Copy)]
@@ -183,9 +185,11 @@ pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<Rast
     })
 }
 
-/// Returns the width in pixels a char will occupy on the screen. The width is constant for all
-/// characters regarding the same combination of [`FontWeight`] and [`RasterHeight`]. The width is
-/// a few percent smaller than the height of each char
+/// Returns the width in pixels a char will occupy on the screen.
+///
+/// The width is constant for all characters regarding the same combination
+/// of [`FontWeight`] and [`RasterHeight`]. The width is a few percent smaller
+/// than the height of each char
 #[inline]
 pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
