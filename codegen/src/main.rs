@@ -16,7 +16,6 @@
 #![allow(clippy::multiple_crate_versions)]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
-#![allow(rustdoc::missing_doc_code_examples)]
 
 use codegen::bytes_outsourcer::{BytesToFileOutsourcer, Context};
 use codegen::font::{noto_font_by_weight, FontWeight, RasterizationInfo, SUPPORTED_FONT_WEIGHTS};

@@ -1,4 +1,9 @@
-# v0.3.0 (2024-04-02)
+# Changelog
+
+## v0.3.1 (2024-12-17)
+- Fixed typo in documentation
+
+## v0.3.0 (2024-04-02)
 - Improved alignment of characters in a line. As a consequence, they are now
   slightly smaller. The correct line height to font size ratio is about 0.75
   rather than the previous 0.84. A lot of thanks to
@@ -12,7 +17,7 @@
   font rendering lib, which uses different metrics.)
 - Some internal code improvements
 
-# v0.2.0 (2022-10-07)
+## v0.2.0 (2022-10-07)
 - **Breaking** renamed `get_bitmap` to `get_raster`
 - **Breaking** renamed `get_bitmap_width` to `get_raster_width`
 - **Breaking** renamed `BitmapHeight` to `RasterHeight`
@@ -36,25 +41,25 @@ unicode ranges. Usually, if you pass a `char` to `get_raster`, the whole variety
 can be reached. Thus, Rust doesn't discard unused ranges. Hence, it is recommended to only select
 the unicode ranges that you do need.
 
-# v0.1.6 (2022-09-01)
+## v0.1.6 (2022-09-01)
 - add the "■" character (U+25A0; [Geometric Shapes](https://jrgraphix.net/r/Unicode/25A0-25FF))
 
-# v0.1.5 (2022-01-20)
+## v0.1.5 (2022-01-20)
 - clearer terminology and doc
 - explains that "bitmap" font is not 100% correct (see section Terminology in README)
 
-# v0.1.4 (2022-01-20)
+## v0.1.4 (2022-01-20)
 - fixed doc
 
-# v0.1.3 (2022-01-20)
+## v0.1.3 (2022-01-20)
 - added 'no_std' category in Cargo.toml
 
-# v0.1.2 (2022-01-19)
+## v0.1.2 (2022-01-19)
 - minor documentation improvements
 
-# v0.1.1 (2022-01-19)
+## v0.1.1 (2022-01-19)
 - Rust edition 2018 instead of 2021 to target a broader audience
 - API adjustments: return Option in main library function and remove panics
 
-# v0.1.0 (2022-01-19)
+## v0.1.0 (2022-01-19)
 - initial release

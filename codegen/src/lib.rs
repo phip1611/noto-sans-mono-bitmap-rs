@@ -18,7 +18,6 @@
 #![allow(clippy::multiple_crate_versions)]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
-#![allow(rustdoc::missing_doc_code_examples)]
 
 pub use crate::unicode::SUPPORTED_UNICODE_RANGES;
 
