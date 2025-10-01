@@ -30,7 +30,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          components: rustfmt
+          components: clippy,rustfmt
       - run: cd codegen
       - name: Rustfmt
         run: cargo fmt -- --check
