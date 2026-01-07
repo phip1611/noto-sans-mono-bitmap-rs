@@ -5,26 +5,19 @@
     // clippy::restriction,
     // clippy::pedantic
 )]
-// now allow a few rules which are denied by the above statement
-// --> they are ridiculous and not necessary
-#![allow(
-    clippy::suboptimal_flops,
-    clippy::redundant_pub_crate,
-    clippy::fallible_impl_from
-)]
 // this comes from the minifb dependency and I can't do anything about it
 #![allow(clippy::multiple_crate_versions)]
 #![deny(missing_debug_implementations)]
 #![deny(rustdoc::all)]
 
 use codegen::bytes_outsourcer::{BytesToFileOutsourcer, Context};
-use codegen::font::{noto_font_by_weight, FontWeight, RasterizationInfo, SUPPORTED_FONT_WEIGHTS};
+use codegen::font::{FontWeight, RasterizationInfo, SUPPORTED_FONT_WEIGHTS, noto_font_by_weight};
 use codegen::{
     CARGO_LIB_RS, CARGO_TOML_TEMPLATE, CODEGEN_BASE_PATH, CODEGEN_RASTERIZED_BYTES_PATH,
     SIZE_MOD_TEMPLATE, SUPPORTED_RASTER_HEIGHTS, SUPPORTED_UNICODE_RANGES, WEIGHT_MOD_TEMPLATE,
 };
 use std::fmt::Write as FmtWrite;
-use std::fs::{create_dir, File};
+use std::fs::{File, create_dir};
 use std::io::Write as IoWrite;
 use std::path::PathBuf;
 
