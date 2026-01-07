@@ -1,3 +1,5 @@
+//! # noto-sans-mono-bitmap
+//!
 //! Provides pre-rasterized characters from the "Noto Sans Mono" font in different sizes and font
 //! weights for multiple unicode ranges. This crate is `no_std` and needs no allocations or floating
 //! point operations. Useful in kernels and bootloaders when only "soft-float" is available. Strictly
