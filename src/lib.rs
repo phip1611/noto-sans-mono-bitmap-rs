@@ -141,7 +141,7 @@ impl RasterHeight {
 /// Returns None, if the given char is not known by the font. In this case,
 /// you could fall back to `get_raster(' ', ...)`.
 #[inline]
-pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<RasterizedChar> {
+pub const fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<RasterizedChar> {
     let raster = match style {
         #[cfg(feature = "light")]
         FontWeight::Light => match size {
@@ -178,11 +178,17 @@ pub fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Option<Rast
         },
     };
 
-    raster.map(|raster| RasterizedChar {
-        raster,
-        height: size.val(),
-        width: get_raster_width(style, size),
-    })
+    // Option::map() not yet const-compatible
+    if let Some(raster) = raster {
+        let rasterized_char = RasterizedChar {
+            raster,
+            height: size.val(),
+            width: get_raster_width(style, size),
+        };
+        Some(rasterized_char)
+    } else {
+        None
+    }
 }
 
 /// Returns the width in pixels a char will occupy on the screen.

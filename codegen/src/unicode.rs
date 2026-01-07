@@ -80,7 +80,7 @@ pub struct UnicodeRange {
 
 impl UnicodeRange {
     /// Returns an iterator over the range.
-    pub const fn iter(&self) -> UnicodeRangeIter {
+    pub const fn iter(&self) -> UnicodeRangeIter<'_> {
         UnicodeRangeIter::<'_>::new(self)
     }
 
