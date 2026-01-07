@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.2 (2026-01-07)
+- `fn get_raster()` is not `const`
+
 ## v0.3.1 (2024-12-17)
 - Fixed typo in documentation
 
