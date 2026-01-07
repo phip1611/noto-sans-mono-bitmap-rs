@@ -7,13 +7,6 @@
     // clippy::restriction,
     // clippy::pedantic
 )]
-// now allow a few rules which are denied by the above statement
-// --> they are ridiculous and not necessary
-#![allow(
-    clippy::suboptimal_flops,
-    clippy::redundant_pub_crate,
-    clippy::fallible_impl_from
-)]
 // this comes from the minifb dependency and I can't do anything about it
 #![allow(clippy::multiple_crate_versions)]
 #![deny(missing_debug_implementations)]

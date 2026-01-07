@@ -132,8 +132,8 @@ impl RasterizationInfo {
     /// Creates a new object, ready to rasterize characters into a raster.
     ///
     /// # Parameters
-    /// * `raster_height` height of the raster. A little bit bigger than the font on the screen.
-    ///                   Values are for example 14, 16, 24,.
+    /// * `raster_height` height of the raster. A little bit bigger than the
+    ///   font on the screen. Values are for example `14`, `16`, or `24`.
     /// * `font_bytes` Raw bytes of a font file that [`fontdue`] can parse.
     pub fn new(raster_height: usize, font_bytes: &[u8]) -> Self {
         let line_height = raster_height as f32;

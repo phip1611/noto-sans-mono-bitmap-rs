@@ -14,7 +14,7 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.56.1 # MSRV for library consumers
+          toolchain: 1.85.0 # MSRV for library consumers
       - name: Build Lib as Dependency with MSRV
         run: cd external/check-msrv && cargo check --all-targets --verbose
 

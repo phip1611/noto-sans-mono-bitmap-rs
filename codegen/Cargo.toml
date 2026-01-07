@@ -2,7 +2,7 @@
 name = "codegen"
 description = "Code generation crate for the noto sans mono bitmap crate."
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,7 +18,7 @@ codegen-units = 1
 opt-level = 1
 
 [dependencies]
-fontdue = { version = "~0.8.0", features = ["parallel", "simd"] }
-minifb = "~0.25.0"
-ttf-parser = "~0.20.0"
+fontdue = { version = "~0.9", features = ["parallel", "simd"] }
+minifb = "~0.28"
+ttf-parser = "~0.25"
 

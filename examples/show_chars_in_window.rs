@@ -1,5 +1,5 @@
 use minifb::{Key, Window, WindowOptions};
-use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight};
+use noto_sans_mono_bitmap::{FontWeight, RasterHeight, get_raster, get_raster_width};
 
 const MSG: &str = "Abc Hello world 123!_-:.qg Äöü#0ß`���� wwwWWW";
 const LINES_TO_PRINT: usize = 5;

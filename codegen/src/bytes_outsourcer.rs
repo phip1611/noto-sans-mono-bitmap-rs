@@ -4,6 +4,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 /// A helper structure that stores bytes into files in a given directory.
+///
 /// These files will contain the rasterized characters. They can be included with `include!`
 /// afterwards. It names all files in a reproducible way. Each filename is influenced by the
 /// character, the font weight, and the raster height. This way, new unicode ranges can be included

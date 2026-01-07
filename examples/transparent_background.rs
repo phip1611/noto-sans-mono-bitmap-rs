@@ -1,5 +1,5 @@
 use minifb::{Key, Window, WindowOptions};
-use noto_sans_mono_bitmap::{get_raster, FontWeight, RasterHeight};
+use noto_sans_mono_bitmap::{FontWeight, RasterHeight, get_raster};
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
