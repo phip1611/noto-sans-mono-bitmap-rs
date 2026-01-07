@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0 (TBD)
+- Rust edition 2024
+- MSRV 1.85.0
+
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`
 

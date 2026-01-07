@@ -115,4 +115,4 @@ Thanks to the original author(s)!
 See LICENSE file in repository.
 
 ## MSRV (for library consumers)
-Rust stable 1.56.1.
+Rust stable 1.85.0.
