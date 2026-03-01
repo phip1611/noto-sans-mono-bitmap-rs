@@ -16,7 +16,11 @@ echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the buil
 find src/res_rasterized_characters -type f -name "*.txt" -exec rm {} +
 
 cd "codegen" || exit
-cargo update
+if [ "$1" != "--ci" ]; then
+    cargo update
+else
+  echo "Skipping `cargo update`"
+fi
 cargo fmt
 cargo test
 RUSTFLAGS="-C target-cpu=native" cargo run --release --bin codegen
@@ -26,7 +30,7 @@ cd ..
 # formatting. Hence, we always execute this step.
 cargo fmt
 
-if [ "$1" != "--skip-checks" ]; then
+if [ "$1" != "--ci" ]; then
   cargo test --doc --features all
   cargo test --all-targets --features all
   cargo clippy --features all  --all-targets
