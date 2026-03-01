@@ -20,7 +20,7 @@ jobs:
       - name: generate crate
         run: ./codegen_n_build.sh --skip-checks
       - name: check diff crate
-        run: git diff --quiet
+        run: git diff --exit-code
 
   codestyle:
     runs-on: ubuntu-latest
