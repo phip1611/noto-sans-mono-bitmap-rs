@@ -18,7 +18,7 @@ jobs:
           toolchain: 1.85.0 # MSRV for library consumers
           components: rustfmt
       - name: generate crate
-        run: ./codegen_n_build.sh --skip-checks
+        run: ./codegen_n_build.sh --ci
       - name: check diff crate
         run: git diff --exit-code
 
