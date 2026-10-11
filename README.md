@@ -95,20 +95,21 @@ you can use
 `$ cargo run --example show_chars_in_window --features all`
 
 ## Limitations & FAQ
-- _The replacement character `�` is cut off on the left and right._: \
-   Yes and I can't do much about it. It seems as this symbol doesn't come from
-   the font but from the rasterization library. However, I didn't spend too
-   much time into the investigation. More details can be found on
-   [GitHub](https://github.com/phip1611/noto-sans-mono-bitmap-rs/pull/17).
-- _The line height is so high._ \
-  Yes and I can't do anything about it. I get the line height from the TTF font
-  and if I don't respect this value, certain characters will be cut off. I'm not
-  an expert in font rendering. But for what it is, it is good enough.
-  However, if you render the font into a framebuffer, you can cut of 1-2px on
-  the top and one on the bottom, which should be fine for normal ASCII.
+- _The replacement character `�` is smaller than other characters._ \
+  In Noto Sans Mono, `�` is twice as wide as all other characters. To keep the
+  mono font guarantee, it is scaled down to fit into a single character cell.
+- _How are the characters placed in their raster?_ \
+  The raster height is the line height of the font (ascender and descender),
+  so all characters share a common baseline and none of them is cut off. You
+  can render lines directly below each other without additional spacing. The
+  raster width is the advance width of the mono font. The outlines are
+  grid-fitted with an auto-hinter (vertical direction only), which makes small
+  sizes crisper. The pixel values describe the coverage of the pixel by the
+  glyph (no gamma correction applied).
 
 ## Trivia
-The rasterization was done with the awesome [fontdue-Crate](https://crates.io/crates/fontdue).
+The glyphs are scaled and auto-hinted with [skrifa](https://crates.io/crates/skrifa)
+and rasterized with [ab_glyph_rasterizer](https://crates.io/crates/ab_glyph_rasterizer).
 Thanks to the original author(s)!
 
 ## License

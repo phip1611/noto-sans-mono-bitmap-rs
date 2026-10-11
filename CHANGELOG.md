@@ -3,6 +3,19 @@
 ## v0.4.0 (TBD)
 - Rust edition 2024
 - MSRV 1.85.0
+- Improved rendering of all characters:
+  - The raster height is now the line height of the font (ascender and
+    descender). Hence, the characters are about 7% larger than before and use
+    the available space better while none of them is cut off.
+  - All characters share a common baseline that is aligned to the pixel grid.
+  - The outlines are auto-hinted (vertical direction only), which makes the
+    baseline, x-height, cap height, and horizontal stems crisp.
+  - Characters are placed according to the font's horizontal metrics.
+  - Wide characters, such as `�`, are scaled down to fit into their raster
+    instead of being cut off. Characters that are only slightly too wide (a
+    few bold ones, such as `ď`) are compressed horizontally. Previously, the
+    cut-off parts were smeared into the first column of the raster.
+  - The raster widths are unchanged.
 
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`

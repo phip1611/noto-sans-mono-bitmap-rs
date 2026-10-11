@@ -1,13 +1,78 @@
-use fontdue::{Font, FontSettings};
+//! Rasterizes the glyphs of the Noto Sans Mono font files into fixed-size cells.
+//!
+//! The generated crate ships these cells as pre-rasterized bytes, so that its
+//! users (kernels, bootloaders) can print nice text without any font rendering
+//! or floating point math at runtime. All font handling happens here, at build
+//! time.
+//!
+//! # Who Does What
+//!
+//! - [`skrifa`] reads the font file: the font's metrics (ascender, advance
+//!   width, ...), which glyph belongs to a character, and each glyph's outline
+//!   as lines and curves. It scales the outline to pixels and grid-fits it with
+//!   its auto-hinter.
+//! - [`ab_glyph_rasterizer`] turns lines and curves into pixels: it computes
+//!   how much of each pixel the outline covers, which gives smooth
+//!   (anti-aliased) edges. It knows nothing about fonts.
+//! - This module chooses the cell size and where each outline goes in its
+//!   cell, and passes the outline from one crate to the other (`RasterPen`).
+//!
+//! # How It Works
+//!
+//! For each font weight and raster height, [`RasterizationInfo`]:
+//! 1. Derives the cell from the font's metrics: the font size is chosen so that
+//!    the line height (ascender and descender) fills the cell height, the
+//!    baseline is snapped to a pixel row, and the cell width is the rounded
+//!    advance width of the mono font.
+//! 2. Gets the outline of each glyph from [`skrifa`], grid-fitted by its
+//!    auto-hinter.
+//! 3. Places the outline in the cell: regular glyphs sit on the common baseline
+//!    with their advance width centered. Glyphs slightly wider than the cell
+//!    (e.g. bold 'ď') are compressed horizontally; much wider ones (e.g. '�')
+//!    are scaled down.
+//! 4. Turns the placed outline into pixels with [`ab_glyph_rasterizer`]. Each
+//!    byte is the coverage of a pixel (0: empty, 255: full), without gamma
+//!    correction.
+//!
+//! # Why This Way
+//!
+//! - **Font metrics:** cells placed next to and below each other look like
+//!   properly typeset text, as all glyphs share one baseline and nothing is cut
+//!   off.
+//! - **Light auto-hinting** (like FreeType's `FT_LOAD_TARGET_LIGHT`): at the
+//!   small font sizes used here (about 12 to 24 px), unhinted edges blur
+//!   across two pixel rows. The hinter snaps the baseline, x-height, cap
+//!   height, and horizontal stems to the pixel grid. It works vertically only,
+//!   so Latin glyphs keep their designed shape and spacing (glyphs of unknown
+//!   scripts, such as arrows, may also be hinted horizontally). The
+//!   auto-hinter is forced, as the font files contain no meaningful hinting
+//!   instructions.
+//! - **Placing outlines, not pixels:** the vector outline is positioned before
+//!   it is rasterized, which keeps edges exact at sub-pixel offsets.
+//! - **Failing loudly:** a missing glyph or a glyph exceeding its cell panics,
+//!   so that broken glyphs are never shipped.
+
+use ab_glyph_rasterizer::{Point, Rasterizer, point};
+use skrifa::instance::{LocationRef, Size};
+use skrifa::metrics::BoundingBox;
+use skrifa::outline::pen::ControlBoundsPen;
+use skrifa::outline::{
+    DrawSettings, Engine, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen, SmoothMode,
+    Target,
+};
+use skrifa::{FontRef, MetadataProvider};
+use std::fmt::{Debug, Formatter};
 
 const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.ttf");
 const NOTO_SANS_MONO_BOLD: &[u8] = include_bytes!("res/NotoSansMono-Bold.ttf");
 const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf");
 
-/// Additional horizontal padding for each rasterized character in its raster/box. All chars
-/// will be centered in that box. With this value, we can influence the spacing of the text
-/// if multiple characters are displayed side by side.
-const RASTERIZED_FONT_ADDITIONAL_PADDING: usize = 0;
+/// Strongest horizontal compression applied to glyphs that are too wide.
+///
+/// Wider glyphs are scaled down uniformly instead. A slight compression is
+/// invisible, whereas uniform scaling hints the glyph at a smaller size, which
+/// may cost a pixel of height.
+const MIN_HORIZONTAL_SQUEEZE: f32 = 0.8;
 
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
@@ -82,161 +147,218 @@ impl FontWeightName {
     }
 }
 
-/// Makes sure the index is in bounds [0..upper_bound] and
-/// of type usize in the end.
-macro_rules! trim_index_to_bounds {
-    ($num:ident, $bounds:expr) => {
-        if ($num as usize) >= $bounds {
-            // usually, here it happens that -1 gets truncated to 0 and
-            // bounds + 1 back to bounds
-
-            // eprintln!("{} is out of bound {}!", $num, $bounds);
-            ($bounds - 1) as usize
-        } else if $num < 0 {
-            0_usize
-        } else {
-            $num as usize
-        }
-    };
-}
-
-/// All font-related information to render characters with [`fontdue`]
-/// into a bitmap font. Currently, the usage of Noto Sans Mono is hard-coded.
+/// Rasterizes the characters of a font into fixed-size cells, like a terminal.
 ///
-/// Guarantees, that each font raster centers the letter in a vertical and horizontal way.
-/// It might truncate letters to the left or right, especially for wide characters, such as '�'.
-/// There will be a small vertical padding to other lines (if rendered as multiline) but almost no
-/// padding to the left and right by default. This way, letters can be displayed side by side and
-/// appear as mono-space font.
-///
-/// The raster is not XxX but XxY, because a mono font not necessarily needs to be XxX, as long as
-/// each character has the same width.
-#[derive(Debug)]
-pub struct RasterizationInfo {
-    /// See [`Font`].
-    font: Font,
-    /// Height of the raster for the font rasterization.
+/// One instance covers one font weight and raster height. See the
+/// [module documentation](crate::font) for how and why.
+pub struct RasterizationInfo<'a> {
+    font: FontRef<'a>,
+    /// Hinting instance for [`Self::font_size`].
+    hinting: HintingInstance,
+    /// Height of each cell in pixels.
     raster_height: usize,
-    /// Width of each letter for the font rasterization.
-    /// This width ensures that the font is indeed a mono-space font.
+    /// Width of each cell in pixels. The same for all glyphs (mono font).
     raster_width: usize,
-    /// This is a little lower value than the height and is required to place the
-    /// letter inside the box without clipping at the top or at the bottom.
+    /// Font size in pixels per em, about 73% of the raster height.
     font_size: f32,
-    /// The widest char/symbol after rasterization. Interesting as debug information which
-    /// letter is the widest. Helps me to streamling the width for the centering of all letters.
-    widest_char: char,
+    /// Distance from the top of the cell to the baseline in pixels.
+    baseline: f32,
+    /// Advance width of the mono font in pixels.
+    advance_width: f32,
 }
 
-impl RasterizationInfo {
-    /// Creates a new object, ready to rasterize characters into a raster.
-    ///
-    /// # Parameters
-    /// * `raster_height` height of the raster. A little bit bigger than the
-    ///   font on the screen. Values are for example `14`, `16`, or `24`.
-    /// * `font_bytes` Raw bytes of a font file that [`fontdue`] can parse.
-    pub fn new(raster_height: usize, font_bytes: &[u8]) -> Self {
-        let line_height = raster_height as f32;
-
-        // Work out the ratio between the raster_height (e.g. 16) and the line height
-        // with ascenders and descenders (e.g. 23).
-        let font_size_to_raster_height_ratio = line_height / {
-            // Get font metrics.
-            let font_face = ttf_parser::Face::parse(font_bytes, 0).unwrap();
-            let ascender = font_face.ascender() as i32;
-            let descender = font_face.descender() as i32;
-            let line_gap = font_face.line_gap() as i32;
-            let units_per_em = font_face.units_per_em() as f32;
-            let scale = line_height / units_per_em;
-            // Get line height plus ascenders and descenders.
-            (ascender - descender + line_gap) as f32 * scale
-        };
-
-        // Work out the font size that fits text inside the raster_height.
-        let font_size = (line_height * font_size_to_raster_height_ratio).floor();
-
-        let font = Font::from_bytes(
-            font_bytes,
-            FontSettings {
-                scale: font_size,
-                ..Default::default()
-            },
-        )
-        .unwrap();
-
-        let (widest_char, raster_width) = Self::find_max_width(&font, font_size);
-
-        Self {
-            font,
-            raster_height,
-            raster_width,
-            font_size,
-            widest_char,
-        }
+impl Debug for RasterizationInfo<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RasterizationInfo")
+            .field("raster_height", &self.raster_height)
+            .field("raster_width", &self.raster_width)
+            .field("font_size", &self.font_size)
+            .field("baseline", &self.baseline)
+            .field("advance_width", &self.advance_width)
+            .finish_non_exhaustive()
     }
+}
 
-    /// Rasterizes a char for the given [`Self`] object into a raster/box. Every letter in the
-    /// resulting mono font is horizontal and vertical aligned to the center. Furthermore,
-    /// the resulting mono font contains already a vertical line spacing of a few pixels, but
-    /// almost no padding to the left and right. This way, letters can be displayed side by side
-    /// and appear as mono-space font.
-    pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
-        let font_size = self.font_size;
-        let (metrics, fontdue_bitmap) = self.font.rasterize(c, font_size);
-
-        // the bitmap that will contain the properly aligned rasterized char
-        let mut letter_bitmap = vec![vec![0_u8; self.raster_width]; self.raster_height];
-
-        // align to horizontal center
-        let x_offset = (metrics.xmin as f32
-            + (self.raster_width as f32 - metrics.advance_width) / 2.0)
-            .floor() as isize;
-
-        // align to vertical center
-        let y_offset = ((font_size - metrics.height as f32) - metrics.ymin as f32).round() as isize;
-
-        for ((y, x), intensity, skip) in fontdue_bitmap
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (i as isize, p))
-            .map(|(i, p)| {
-                let x = x_offset + (i % metrics.width as isize);
-                let y = y_offset + (i / metrics.width as isize);
-
-                let skip = x >= self.raster_width as isize || y >= self.raster_height as isize;
-
-                // if some letter is "too" big and out of bounds the box: cut and prevent error
-                let x = trim_index_to_bounds!(x, self.raster_width());
-                let y = trim_index_to_bounds!(y, self.raster_height());
-
-                ((y, x), *p, skip)
-            })
-        {
-            if !skip {
-                letter_bitmap[y][x] = intensity;
-            }
-        }
-
-        letter_bitmap
-    }
-
-    /// Searches the maximum width, that a pre-rasterized character/ will have for the given font
-    /// size. This way, the width of the final raster can be reduced to HEIGHT x WIDTH instead of
-    /// HEIGHT x HEIGHT, which would result a big space between all letters. The pre-rasterized
-    /// characters will be all "monospaced" out-of-the box with this approach.
+impl<'a> RasterizationInfo<'a> {
+    /// Prepares the rasterization of a font into cells of the given height.
     ///
-    /// This function only takes ASCII letters (BASIC_LATIN) into account. Wider symbols are
-    /// ignored and will later be truncated/cut to this width.
-    fn find_max_width(font: &Font, font_size: f32) -> (char, usize) {
-        let (char, max) = crate::unicode::BASIC_LATIN
-            .iter()
-            // return tuple of char and rasterized width
-            .map(|c| (c, font.rasterize(c, font_size).0.width))
-            // look for maximum by width
-            .max_by(|(_, l_width), (_, r_width)| l_width.cmp(r_width))
+    /// `font_bytes` are the raw bytes of a TrueType/OpenType font file.
+    pub fn new(raster_height: usize, font_bytes: &'a [u8]) -> Self {
+        let font = FontRef::new(font_bytes).unwrap();
+
+        let metrics = font.metrics(Size::unscaled(), LocationRef::default());
+        let units_per_em = metrics.units_per_em as f32;
+        // The descent is negative.
+        let line_height = metrics.ascent - metrics.descent + metrics.leading;
+        let font_size = raster_height as f32 * units_per_em / line_height;
+        let scale = font_size / units_per_em;
+        // Center the line gap and snap the baseline to the pixel grid, so that
+        // the bottom edge of the letters is crisp.
+        let baseline = ((metrics.ascent + metrics.leading / 2.0) * scale).round();
+
+        // Shared by all glyphs of the mono font, except a few such as '�'.
+        let advance_width = font
+            .glyph_metrics(Size::new(font_size), LocationRef::default())
+            .advance_width(font.charmap().map('M').unwrap())
             .unwrap();
 
-        (char, max + RASTERIZED_FONT_ADDITIONAL_PADDING)
+        Self {
+            hinting: Self::hinting_instance(&font, font_size),
+            font,
+            raster_height,
+            raster_width: advance_width.round() as usize,
+            font_size,
+            baseline,
+            advance_width,
+        }
+    }
+
+    /// Creates the hinter that snaps outlines to the pixel grid.
+    ///
+    /// The auto-hinter is forced, as the font files contain no meaningful
+    /// hinting instructions.
+    fn hinting_instance(font: &FontRef, font_size: f32) -> HintingInstance {
+        let options = HintingOptions {
+            engine: Engine::Auto(None),
+            target: Target::Smooth {
+                mode: SmoothMode::Light,
+                symmetric_rendering: true,
+                preserve_linear_metrics: true,
+            },
+        };
+        HintingInstance::new(
+            &font.outline_glyphs(),
+            Size::new(font_size),
+            LocationRef::default(),
+            options,
+        )
+        .unwrap()
+    }
+
+    /// Rasterizes a character into a cell of its own.
+    ///
+    /// First, the glyph's vector outline is placed in the cell (and scaled if
+    /// it doesn't fit). Then, `draw_into_cell` turns it into pixels. Placing the
+    /// outline rather than finished pixels keeps edges exact at sub-pixel
+    /// offsets.
+    ///
+    /// Panics if the font has no glyph for the character, so that the font's
+    /// placeholder glyph is never shipped.
+    pub fn rasterize(&self, c: char) -> Vec<Vec<u8>> {
+        let glyph_id = self
+            .font
+            .charmap()
+            .map(c)
+            .unwrap_or_else(|| panic!("font has no glyph for {c:?}"));
+        let glyph = self.font.outline_glyphs().get(glyph_id).unwrap();
+
+        let Some(bounds) = glyph_bounds(&glyph, &self.hinting) else {
+            // Whitespace
+            return vec![vec![0; self.raster_width]; self.raster_height];
+        };
+        let scale_x = (self.raster_width as f32 / (bounds.x_max - bounds.x_min)).min(1.0);
+        if scale_x < MIN_HORIZONTAL_SQUEEZE {
+            self.draw_scaled_down(c, &glyph, bounds, scale_x)
+        } else {
+            self.draw_on_baseline(c, &glyph, bounds, scale_x)
+        }
+    }
+
+    /// Draws a regular glyph on the common baseline.
+    ///
+    /// The advance width is centered in the cell. Glyphs slightly wider than
+    /// the cell are compressed horizontally by `scale_x`, which keeps their
+    /// hinting intact. Glyphs are never moved vertically, as this would break
+    /// the common baseline.
+    fn draw_on_baseline(
+        &self,
+        c: char,
+        glyph: &OutlineGlyph,
+        bounds: BoundingBox,
+        scale_x: f32,
+    ) -> Vec<Vec<u8>> {
+        let raster_width = self.raster_width as f32;
+        // Center the advance width, but keep the ink inside the cell.
+        let dx = ((raster_width - self.advance_width) / 2.0)
+            .max(-bounds.x_min * scale_x)
+            .min(bounds.x_max.mul_add(-scale_x, raster_width));
+        self.draw_into_cell(c, glyph, &self.hinting, scale_x, dx, self.baseline)
+    }
+
+    /// Draws a glyph that is much wider than the cell (e.g. '�') scaled down.
+    ///
+    /// The glyph is hinted at the smaller font size and centered horizontally.
+    /// Its vertical center stays where it is relative to the baseline.
+    fn draw_scaled_down(
+        &self,
+        c: char,
+        glyph: &OutlineGlyph,
+        bounds: BoundingBox,
+        scale: f32,
+    ) -> Vec<Vec<u8>> {
+        let hinting = Self::hinting_instance(&self.font, self.font_size * scale);
+        let scaled = glyph_bounds(glyph, &hinting).unwrap();
+        let dx = (self.raster_width as f32 - (scaled.x_max - scaled.x_min)) / 2.0 - scaled.x_min;
+        // Round to keep the hinted outline aligned to the pixel grid.
+        let center_shift = (scaled.y_min + scaled.y_max - bounds.y_min - bounds.y_max) / 2.0;
+        let dy = self.baseline + center_shift.round();
+        self.draw_into_cell(c, glyph, &hinting, 1.0, dx, dy)
+    }
+
+    /// Turns a glyph outline into the pixels of a cell.
+    ///
+    /// The outline is compressed horizontally by `scale_x` and its origin is
+    /// placed at `(dx, dy)` in the cell. Panics if a visible part of the glyph
+    /// is outside the cell.
+    fn draw_into_cell(
+        &self,
+        c: char,
+        glyph: &OutlineGlyph,
+        hinting: &HintingInstance,
+        scale_x: f32,
+        dx: f32,
+        dy: f32,
+    ) -> Vec<Vec<u8>> {
+        // The margin catches parts of the glyph outside the cell.
+        let margin = self.raster_height;
+        let mut rasterizer = Rasterizer::new(
+            self.raster_width + 2 * margin,
+            self.raster_height + 2 * margin,
+        );
+        let mut pen = RasterPen {
+            rasterizer: &mut rasterizer,
+            scale_x,
+            dx: dx + margin as f32,
+            dy: dy + margin as f32,
+            start: point(0.0, 0.0),
+            current: point(0.0, 0.0),
+        };
+        glyph
+            .draw(DrawSettings::hinted(hinting, false), &mut pen)
+            .unwrap();
+
+        let mut raster = vec![vec![0_u8; self.raster_width]; self.raster_height];
+        let mut lost_coverage = 0.0;
+        rasterizer.for_each_pixel_2d(|x, y, coverage| {
+            let coverage = coverage.clamp(0.0, 1.0);
+            let x = (x as usize)
+                .checked_sub(margin)
+                .filter(|&x| x < self.raster_width);
+            let y = (y as usize)
+                .checked_sub(margin)
+                .filter(|&y| y < self.raster_height);
+            match (x, y) {
+                (Some(x), Some(y)) => raster[y][x] = (coverage * 255.0).round() as u8,
+                _ => lost_coverage += coverage,
+            }
+        });
+        assert!(
+            lost_coverage < 0.5,
+            "glyph {c:?} exceeds the raster of height {}",
+            self.raster_height
+        );
+
+        raster
     }
 
     pub const fn raster_height(&self) -> usize {
@@ -250,9 +372,71 @@ impl RasterizationInfo {
     pub const fn font_size(&self) -> f32 {
         self.font_size
     }
+}
 
-    pub const fn widest_char(&self) -> char {
-        self.widest_char
+/// Returns the bounds of a hinted glyph outline in pixels, or `None` if empty.
+///
+/// The bounds include control points, so they may be slightly too large.
+fn glyph_bounds(glyph: &OutlineGlyph, hinting: &HintingInstance) -> Option<BoundingBox> {
+    let mut pen = ControlBoundsPen::default();
+    glyph
+        .draw(DrawSettings::hinted(hinting, false), &mut pen)
+        .unwrap();
+    pen.bounding_box()
+}
+
+/// Pen that draws a glyph outline into the rasterizer.
+///
+/// It converts from glyph coordinates (origin on the baseline, y up) to the
+/// rasterizer's (origin at the top left, y down): `(dx + x * scale_x, dy - y)`.
+struct RasterPen<'r> {
+    /// Accumulates the coverage of the drawn lines and curves.
+    rasterizer: &'r mut Rasterizer,
+    /// Horizontal compression factor (1.0: none).
+    scale_x: f32,
+    /// X coordinate of the glyph origin in the rasterizer.
+    dx: f32,
+    /// Y coordinate of the glyph origin (on the baseline) in the rasterizer.
+    dy: f32,
+    /// First point of the current contour, to close it.
+    start: Point,
+    /// End point of the last drawn segment, where the next one starts.
+    current: Point,
+}
+
+impl RasterPen<'_> {
+    fn point(&self, x: f32, y: f32) -> Point {
+        point(x.mul_add(self.scale_x, self.dx), self.dy - y)
+    }
+}
+
+impl OutlinePen for RasterPen<'_> {
+    fn move_to(&mut self, x: f32, y: f32) {
+        self.start = self.point(x, y);
+        self.current = self.start;
+    }
+
+    fn line_to(&mut self, x: f32, y: f32) {
+        let p = self.point(x, y);
+        self.rasterizer.draw_line(self.current, p);
+        self.current = p;
+    }
+
+    fn quad_to(&mut self, cx0: f32, cy0: f32, x: f32, y: f32) {
+        let (c0, p) = (self.point(cx0, cy0), self.point(x, y));
+        self.rasterizer.draw_quad(self.current, c0, p);
+        self.current = p;
+    }
+
+    fn curve_to(&mut self, cx0: f32, cy0: f32, cx1: f32, cy1: f32, x: f32, y: f32) {
+        let (c0, c1, p) = (self.point(cx0, cy0), self.point(cx1, cy1), self.point(x, y));
+        self.rasterizer.draw_cubic(self.current, c0, c1, p);
+        self.current = p;
+    }
+
+    fn close(&mut self) {
+        self.rasterizer.draw_line(self.current, self.start);
+        self.current = self.start;
     }
 }
 
@@ -264,9 +448,62 @@ mod tests {
     #[test]
     fn test_font_props() {
         let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
-        println!("raster_height = {}", props.raster_height());
-        println!("font_size     = {}", props.font_size());
-        println!("raster_width  = {}", props.raster_width());
-        println!("widest_char   = '{}'", props.widest_char());
+        assert_eq!(props.raster_height(), 16);
+        assert_eq!(props.raster_width(), 7);
+        assert_eq!(props.baseline, 13.0);
+    }
+
+    /// Whitespace has no outline and must result in an empty raster.
+    #[test]
+    fn test_rasterize_whitespace() {
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
+        let raster = props.rasterize(' ');
+        assert_eq!(raster.len(), 16);
+        assert!(raster.iter().all(|row| row.len() == 7));
+        assert!(raster.iter().flatten().all(|&px| px == 0));
+    }
+
+    /// 'H' and 'x' end on the same row, as all glyphs share one baseline.
+    #[test]
+    fn test_rasterize_common_baseline() {
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
+        let last_ink_row = |c| {
+            let raster = props.rasterize(c);
+            raster
+                .iter()
+                .rposition(|row| row.iter().any(|&px| px > 0))
+                .unwrap()
+        };
+        assert_eq!(last_ink_row('H'), 12);
+        assert_eq!(last_ink_row('x'), 12);
+        // Thanks to the hinting, the stems of 'H' end sharply.
+        let raster = props.rasterize('H');
+        assert_eq!(raster[12], raster[11]);
+    }
+
+    /// Glyphs much wider than the cell are scaled down rather than cut off.
+    #[test]
+    fn test_rasterize_wide_glyph() {
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
+        let raster = props.rasterize('\u{fffd}');
+        let left = raster.iter().map(|row| row[0]).max().unwrap();
+        let right = raster.iter().map(|row| row[6]).max().unwrap();
+        assert!(left > 0 && left < 255);
+        assert!(right > 0 && right < 255);
+    }
+
+    /// Glyphs slightly wider than the cell are compressed but keep their height.
+    #[test]
+    fn test_rasterize_slightly_wide_glyph() {
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_BOLD);
+        let ink_rows = |c| {
+            let raster = props.rasterize(c);
+            let first = raster.iter().position(|row| row.iter().any(|&px| px > 0));
+            let last = raster.iter().rposition(|row| row.iter().any(|&px| px > 0));
+            (first.unwrap(), last.unwrap())
+        };
+        // 'ď' (U+010F) is 'd' with a caron on its right side.
+        assert_eq!(ink_rows('\u{10f}').1, ink_rows('d').1);
+        assert_eq!(ink_rows('\u{10f}').0, ink_rows('d').0);
     }
 }

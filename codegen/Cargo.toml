@@ -14,11 +14,11 @@ lto = true
 codegen-units = 1
 
 [profile.dev]
-# otherwise fontdue generation is very slow
+# otherwise the rasterization is very slow
 opt-level = 1
 
 [dependencies]
-fontdue = { version = "~0.9", features = ["parallel", "simd"] }
+ab_glyph_rasterizer = "~0.1.10"
 minifb = "~0.28"
-ttf-parser = "~0.25"
+skrifa = "~0.48"
 

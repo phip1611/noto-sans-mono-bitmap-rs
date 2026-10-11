@@ -5,9 +5,9 @@
 //! * License: SIL Open Font License (OFL) <https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL>
 
 /// The constant height of each rasterized character for the given font weight
-/// and size. This size corresponds to the size of the module name. The font
-/// size will be a few percent smaller, as each raster contains a small vertical
-/// to ensure vertical alignment of multiple characters.
+/// and size. This size corresponds to the size of the module name. It is the
+/// line height of the font (ascender and descender), so the font size is about
+/// 73% of this.
 #[allow(dead_code)]
 pub const RASTER_HEIGHT: usize = %CODEGEN_RASTER_HEIGHT%;
 
