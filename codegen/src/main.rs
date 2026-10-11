@@ -303,6 +303,57 @@ fn codegen_lib_rs() {
         });
     }
 
+    // codegen the lists of enabled font weights, raster heights, and supported
+    // chars for the unit tests of the generated crate
+    let mut test_font_weights = String::new();
+    SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
+        writeln!(
+            &mut test_font_weights,
+            "        #[cfg(feature = \"{}\")]",
+            w.mod_name()
+        )
+        .unwrap();
+        writeln!(
+            &mut test_font_weights,
+            "        FontWeight::{:?},",
+            w.name()
+        )
+        .unwrap();
+    });
+    let mut test_raster_heights = String::new();
+    SUPPORTED_RASTER_HEIGHTS.iter().for_each(|size| {
+        writeln!(
+            &mut test_raster_heights,
+            "        #[cfg(feature = \"{}\")]",
+            size.feature_name()
+        )
+        .unwrap();
+        writeln!(
+            &mut test_raster_heights,
+            "        RasterHeight::Size{},",
+            size.value()
+        )
+        .unwrap();
+    });
+    let mut test_char_segments = String::new();
+    SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
+        for segment in range.segments() {
+            writeln!(
+                &mut test_char_segments,
+                "        #[cfg(feature = \"{}\")]",
+                range.feature_name
+            )
+            .unwrap();
+            writeln!(
+                &mut test_char_segments,
+                "        RangeInclusive::new('\\u{{{:x}}}', '\\u{{{:x}}}'),",
+                *segment.chars.start() as u32,
+                *segment.chars.end() as u32
+            )
+            .unwrap();
+        }
+    });
+
     // replace placeholders
     {
         writeln!(
@@ -322,6 +373,15 @@ fn codegen_lib_rs() {
                 .replace(
                     "// %CODEGEN_get_raster_WIDTH%",
                     get_raster_width_match.as_str()
+                )
+                .replace("// %CODEGEN_TEST_FONT_WEIGHTS%", test_font_weights.as_str())
+                .replace(
+                    "// %CODEGEN_TEST_RASTER_HEIGHTS%",
+                    test_raster_heights.as_str()
+                )
+                .replace(
+                    "// %CODEGEN_TEST_CHAR_SEGMENTS%",
+                    test_char_segments.as_str()
                 )
         )
         .unwrap();

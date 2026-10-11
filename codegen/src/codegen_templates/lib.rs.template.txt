@@ -221,3 +221,85 @@ const fn glyph_at(blob: &'static [u8], glyph_len: usize, index: usize) -> &'stat
     let (glyph, _) = glyph.split_at(glyph_len);
     glyph
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::ops::RangeInclusive;
+
+    /// All font weights enabled by the current set of Cargo features.
+    const FONT_WEIGHTS: &[FontWeight] = &[
+// %CODEGEN_TEST_FONT_WEIGHTS%
+    ];
+
+    /// All raster heights enabled by the current set of Cargo features.
+    const RASTER_HEIGHTS: &[RasterHeight] = &[
+// %CODEGEN_TEST_RASTER_HEIGHTS%
+    ];
+
+    /// All chars supported with the current set of Cargo features
+    /// (unicode ranges), as segments of consecutive code points.
+    const CHAR_SEGMENTS: &[RangeInclusive<char>] = &[
+// %CODEGEN_TEST_CHAR_SEGMENTS%
+    ];
+
+    fn is_supported(c: char) -> bool {
+        CHAR_SEGMENTS.iter().any(|chars| chars.contains(&c))
+    }
+
+    // Ensures that `get_raster` can be evaluated at compile time.
+    #[allow(clippy::const_is_empty)]
+    const _: () = {
+        if !FONT_WEIGHTS.is_empty() && !RASTER_HEIGHTS.is_empty() && !CHAR_SEGMENTS.is_empty() {
+            let c = *CHAR_SEGMENTS[0].start();
+            match get_raster(c, FONT_WEIGHTS[0], RASTER_HEIGHTS[0]) {
+                Some(raster) => assert!(raster.pixels().len() == raster.width() * raster.height()),
+                None => panic!("supported char must have a glyph"),
+            }
+        }
+    };
+
+    #[test]
+    fn glyph_layout_of_all_chars() {
+        for &weight in FONT_WEIGHTS {
+            for &size in RASTER_HEIGHTS {
+                let width = get_raster_width(weight, size);
+                let height = size.val();
+                assert!(width > 0);
+                let mut glyph_count = 0;
+
+                for c in char::MIN..=char::MAX {
+                    let Some(raster) = get_raster(c, weight, size) else {
+                        assert!(!is_supported(c), "{c:?} must have a glyph ({weight:?}, {size:?})");
+                        continue;
+                    };
+                    assert!(is_supported(c), "{c:?} must not have a glyph ({weight:?}, {size:?})");
+                    glyph_count += 1;
+
+                    assert_eq!(raster.width(), width);
+                    assert_eq!(raster.height(), height);
+                    assert_eq!(raster.pixels().len(), width * height);
+                    assert_eq!(raster.rows().count(), height);
+                    assert!(raster.rows().all(|row| row.len() == width));
+                    assert_eq!(raster.pixel(width - 1, height - 1), raster.pixels().last().copied());
+                    assert_eq!(raster.pixel(width, 0), None);
+                    assert_eq!(raster.pixel(0, height), None);
+                }
+
+                let expected_count = CHAR_SEGMENTS.iter().map(|chars| chars.clone().count()).sum::<usize>();
+                assert_eq!(glyph_count, expected_count);
+            }
+        }
+    }
+
+    #[test]
+    fn space_is_blank() {
+        for &weight in FONT_WEIGHTS {
+            for &size in RASTER_HEIGHTS {
+                if let Some(raster) = get_raster(' ', weight, size) {
+                    assert!(raster.pixels().iter().all(|&p| p == 0));
+                }
+            }
+        }
+    }
+}
