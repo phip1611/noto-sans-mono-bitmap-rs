@@ -414,7 +414,9 @@ fn codegen_font_weight_sub_modules(
             &mut code_range_string,
             "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
             /// Wide characters, such as '�', are scaled down to fit into the raster in order to\n\
-            /// fulfill the mono font guarantee. All characters share a common baseline.",
+            /// fulfill the mono font guarantee. All characters share a common baseline.\n\
+            ///\n\
+            /// The pixels are stored flat in row-major order.",
             weight.mod_name(),
             font.font_size().round()
         )
@@ -422,7 +424,7 @@ fn codegen_font_weight_sub_modules(
         writeln!(&mut code_range_string, "#[inline]").unwrap();
         writeln!(
             &mut code_range_string,
-            "pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {{"
+            "pub const fn get_char(c: char) -> Option<&'static [u8]> {{"
         )
         .unwrap();
         writeln!(&mut code_range_string, "    match c {{").unwrap();
@@ -494,20 +496,17 @@ fn codegen_font_weight_sub_modules(
         .unwrap();
 }
 
-/// Generates the Rust source code of type `&[&u8]]` from a raster.
+/// Generates the Rust source code of type `&[u8]` from a raster: the pixels in
+/// row-major order, one row per line.
 fn codegen_raster(raster: &Vec<Vec<u8>>) -> String {
     let mut rust_byte_array_str = String::new();
     writeln!(&mut rust_byte_array_str, "&[").unwrap();
     for row in raster {
-        write!(&mut rust_byte_array_str, "    &[").unwrap();
-        for (i, byte) in row.iter().enumerate() {
-            if i == row.len() - 1 {
-                write!(&mut rust_byte_array_str, "{}", byte).unwrap();
-            } else {
-                write!(&mut rust_byte_array_str, "{}, ", byte).unwrap();
-            }
+        write!(&mut rust_byte_array_str, "   ").unwrap();
+        for byte in row {
+            write!(&mut rust_byte_array_str, " {},", byte).unwrap();
         }
-        writeln!(&mut rust_byte_array_str, "],").unwrap();
+        writeln!(&mut rust_byte_array_str).unwrap();
     }
     write!(&mut rust_byte_array_str, "]").unwrap();
     rust_byte_array_str
@@ -524,9 +523,9 @@ mod tests {
         let generated_source_code = codegen_raster(&raster);
         assert_eq!(
             "&[\n\
-            \x20\x20\x20\x20&[1, 2, 3],\n\
-            \x20\x20\x20\x20&[4, 5, 6],\n\
-            \x20\x20\x20\x20&[7, 8, 9],\n\
+            \x20\x20\x20\x201, 2, 3,\n\
+            \x20\x20\x20\x204, 5, 6,\n\
+            \x20\x20\x20\x207, 8, 9,\n\
             ]",
             &generated_source_code
         );

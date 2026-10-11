@@ -62,7 +62,8 @@ fn main() {
     let char_raster =
         get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
     println!("{:?}", char_raster);
-    for (row_i, row) in char_raster.raster().iter().enumerate() {
+    // The pixels are stored in row-major order: one byte (intensity 0..=255) per pixel.
+    for (row_i, row) in char_raster.rows().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {
             println!("[{:02}][{:02}]: {:03}", row_i, col_i, pixel);
         }

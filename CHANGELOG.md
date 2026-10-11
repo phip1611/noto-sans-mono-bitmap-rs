@@ -16,6 +16,19 @@
     few bold ones, such as `ď`) are compressed horizontally. Previously, the
     cut-off parts were smeared into the first column of the raster.
   - The raster widths are unchanged.
+- **Breaking** `RasterizedChar` now stores its pixels flat in row-major order
+  (`width * height` bytes, top row first) instead of as one slice per row
+  (`&[&[u8]]`). `RasterizedChar::raster()` was replaced by:
+  - `pixels() -> &'static [u8]`: all pixels, flat and row-major; the pixel at
+    `(x, y)` is `pixels()[y * width() + x]`
+  - `rows() -> core::slice::ChunksExact<'static, u8>`: iterator over the rows
+  - `pixel(x, y) -> Option<u8>` (`const`): a single pixel
+
+  `RasterizedChar` now also implements `Clone`, `Copy`, `PartialEq`, and `Eq`.
+
+  **Migration:** replace `raster.raster().iter()` with `raster.rows()`, and
+  `raster.raster()[y][x]` with `raster.pixel(x, y).unwrap()` or
+  `raster.pixels()[y * raster.width() + x]`.
 
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`
