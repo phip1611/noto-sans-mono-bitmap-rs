@@ -5,11 +5,13 @@ use std::path::PathBuf;
 
 /// A helper structure that stores bytes into files in a given directory.
 ///
-/// These files will contain the rasterized characters. They can be included with `include!`
-/// afterwards. It names all files in a reproducible way. Each filename is influenced by the
-/// character, the font weight, and the raster height. This way, new unicode ranges can be included
-/// without invaliding old files, which would happen in the case of incremental numbers as file
-/// name.
+/// These files contain the rasterized glyphs of one unicode range for a given
+/// font weight and raster height as raw binary blob. They can be included with
+/// `include_bytes!` afterwards. It names all files in a reproducible way. Each
+/// filename is influenced by the font weight, the raster height, and the
+/// unicode range. This way, new unicode ranges can be included without
+/// invalidating old files, which would happen in the case of incremental
+/// numbers as file name.
 #[derive(Debug)]
 pub struct BytesToFileOutsourcer {
     out_dir: &'static str,
@@ -21,7 +23,7 @@ impl BytesToFileOutsourcer {
     }
 
     /// Creates a file in the given directory with `bytes` as content.
-    /// The `c` is relevant for the naming of the file.
+    /// The `ctx` is relevant for the naming of the file.
     pub fn outsource_bytes(&mut self, bytes: &[u8], ctx: Context) -> PathBuf {
         let path = self.generate_path(ctx);
 
@@ -46,18 +48,19 @@ impl BytesToFileOutsourcer {
 /// Context object needed to uniquely name files in a reproducible way.
 #[derive(Debug, Copy, Clone)]
 pub struct Context {
-    pub c: char,
     pub weight: FontWeight,
     pub height: u32,
+    /// Feature name of the unicode range, such as `unicode-basic-latin`.
+    pub unicode_range: &'static str,
 }
 
 impl Context {
     fn generate_filename(&self) -> String {
         format!(
-            "0x{:x}_h{}_w{:?}.txt",
-            self.c as u32,
+            "{}_size_{}_{}.bin",
+            self.weight.mod_name(),
             self.height,
-            self.weight.name()
+            self.unicode_range
         )
     }
 }
@@ -73,16 +76,16 @@ mod tests {
         let path = outsourcer.outsource_bytes(
             b"hello world",
             Context {
-                c: 'a',
                 weight: FontWeight::new(FontWeightName::Regular, false),
                 height: 30,
+                unicode_range: "unicode-basic-latin",
             },
         );
 
-        // 0x61: ascii of 'a'
         assert_eq!(
-            "target/0x61_h30_wRegular.txt",
+            "target/regular_size_30_unicode-basic-latin.bin",
             path.as_os_str().to_str().unwrap()
         );
+        assert_eq!(std::fs::read(path).unwrap(), b"hello world");
     }
 }

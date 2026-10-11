@@ -29,6 +29,12 @@
   **Migration:** replace `raster.raster().iter()` with `raster.rows()`, and
   `raster.raster()[y][x]` with `raster.pixel(x, y).unwrap()` or
   `raster.pixels()[y * raster.width() + x]`.
+- The glyphs are now stored as one binary blob per font weight, raster height,
+  and unicode range (included via `include_bytes!`) instead of thousands of
+  generated Rust source files. This shrinks the crate, speeds up compilation,
+  and removes the per-row pointers (and their relocations in position
+  independent binaries) from the compiled binary. `get_raster()` and
+  `get_raster_width()` remain `const fn`.
 
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`

@@ -13,6 +13,13 @@ instead in the main crate.
 - `external/`: Independent consumers of the generated code to perform various
                checks.
 - `src/`     : Generated source. The actual crate / library.
+  - `src/res_rasterized_characters/`: Generated binary blobs with the glyphs,
+    one per font weight, raster height, and unicode range (e.g.
+    `regular_size_16_unicode-basic-latin.bin`). Each blob contains all glyphs
+    of the unicode range back to back in code point order (ignored code points
+    are skipped); each glyph is `width * height` bytes, row-major, one byte
+    (intensity) per pixel. The generated `src/<weight>/size_<height>.rs`
+    modules include them with `include_bytes!` and map chars to glyphs.
 
 - `check_crate_size.sh`:  Helper to check the size of the packaged crate (raw
                           source size)

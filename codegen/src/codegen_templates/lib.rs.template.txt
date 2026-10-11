@@ -209,3 +209,15 @@ pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
 // %CODEGEN_get_raster_WIDTH%
     }
 }
+
+/// Returns the `index`-th glyph of a blob that contains glyphs of `glyph_len`
+/// bytes each, stored back to back.
+///
+/// The generated lookup code guarantees that `index` is in bounds.
+#[allow(dead_code)]
+#[inline]
+const fn glyph_at(blob: &'static [u8], glyph_len: usize, index: usize) -> &'static [u8] {
+    let (_, glyph) = blob.split_at(index * glyph_len);
+    let (glyph, _) = glyph.split_at(glyph_len);
+    glyph
+}
