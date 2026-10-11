@@ -105,10 +105,11 @@ impl FontWeight {
 
 /// The height of the pre-rasterized font.
 ///
-/// The font size will be a few percent less, because each letter contains
-/// vertical padding for proper alignment of chars (i.e. ÄyA). The width of
-/// each character will be also less than the height, because there is no
-/// horizontal padding included.
+/// The raster height is the line height of the font: it covers the font's
+/// ascender and descender, so that all characters (i.e. ÄyA) fit in and share
+/// a common baseline. Hence, the font size is about 73% of the raster height.
+/// The width of each character is the advance width of the mono font, which
+/// is less than the height.
 ///
 /// The available variants depend on the selected Cargo build features.
 #[derive(Debug, Clone, Copy)]

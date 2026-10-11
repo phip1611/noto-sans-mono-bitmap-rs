@@ -1,4 +1,4 @@
-//! Helper binary to rasterize a few letters with fontdue in a window and display its
+//! Helper binary to rasterize a few letters in a window and display its
 //! rasterized dimensions.
 
 use codegen::font::RasterizationInfo;

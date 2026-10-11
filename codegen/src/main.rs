@@ -27,13 +27,6 @@ fn main() {
     // so that I can `include!` the Rust definitions for the rasterized characters.
     let mut bytes_outsourcer = BytesToFileOutsourcer::new(CODEGEN_RASTERIZED_BYTES_PATH);
 
-    // debugging info
-    {
-        let font =
-            RasterizationInfo::new(20_usize, noto_font_by_weight(&SUPPORTED_FONT_WEIGHTS[0]));
-        println!("INFO: The widest char is '{}'", font.widest_char());
-    }
-
     // create the font weight modules for each supported font weight.
     for weight in SUPPORTED_FONT_WEIGHTS {
         let font_bytes = noto_font_by_weight(weight);
@@ -414,8 +407,8 @@ fn codegen_font_weight_sub_modules(
         writeln!(
             &mut code_range_string,
             "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
-            /// Wide characters, such as '�', will be truncated in their width in order to fulfill\n\
-            /// the mono font guarantee. All characters are centered in their raster.",
+            /// Wide characters, such as '�', are scaled down to fit into the raster in order to\n\
+            /// fulfill the mono font guarantee. All characters share a common baseline.",
             weight.mod_name(),
             font.font_size().round()
         )
