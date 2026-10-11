@@ -11,9 +11,10 @@
   - The outlines are auto-hinted (vertical direction only), which makes the
     baseline, x-height, cap height, and horizontal stems crisp.
   - Characters are placed according to the font's horizontal metrics.
-  - Characters wider than their raster, such as `�` or bold `ď`, are
-    compressed horizontally instead of being cut off. Previously, the cut-off
-    parts were smeared into the first column of the raster.
+  - Wide characters, such as `�`, are scaled down to fit into their raster
+    instead of being cut off. Characters that are only slightly too wide (a
+    few bold ones, such as `ď`) are compressed horizontally. Previously, the
+    cut-off parts were smeared into the first column of the raster.
   - The raster widths are unchanged.
 
 ## v0.3.2 (2026-01-07)

@@ -27,8 +27,9 @@
 //! 2. Gets the outline of each glyph from [`skrifa`], grid-fitted by its
 //!    auto-hinter.
 //! 3. Places the outline in the cell: regular glyphs sit on the common baseline
-//!    with their advance width centered. Glyphs wider than the cell (e.g.
-//!    bold 'ď' or '�') are compressed horizontally.
+//!    with their advance width centered. Glyphs slightly wider than the cell
+//!    (e.g. bold 'ď') are compressed horizontally; much wider ones (e.g. '�')
+//!    are scaled down.
 //! 4. Turns the placed outline into pixels with [`ab_glyph_rasterizer`]. Each
 //!    byte is the coverage of a pixel (0: empty, 255: full), without gamma
 //!    correction.
@@ -65,6 +66,13 @@ use std::fmt::{Debug, Formatter};
 const NOTO_SANS_MONO_REGULAR: &[u8] = include_bytes!("res/NotoSansMono-Regular.ttf");
 const NOTO_SANS_MONO_BOLD: &[u8] = include_bytes!("res/NotoSansMono-Bold.ttf");
 const NOTO_SANS_MONO_LIGHT: &[u8] = include_bytes!("res/NotoSansMono-Light.ttf");
+
+/// Strongest horizontal compression applied to glyphs that are too wide.
+///
+/// Wider glyphs are scaled down uniformly instead. A slight compression is
+/// invisible, whereas uniform scaling hints the glyph at a smaller size, which
+/// may cost a pixel of height.
+const MIN_HORIZONTAL_SQUEEZE: f32 = 0.8;
 
 /// All available fonts. Must match the order in [`FontWeight`]!
 const NOTO_SANS_FAMILY: [&[u8]; 3] = [
@@ -229,8 +237,8 @@ impl<'a> RasterizationInfo<'a> {
 
     /// Rasterizes a character into a cell of its own.
     ///
-    /// First, the glyph's vector outline is placed in the cell (and compressed
-    /// if it is too wide). Then, `draw_into_cell` turns it into pixels. Placing the
+    /// First, the glyph's vector outline is placed in the cell (and scaled if
+    /// it doesn't fit). Then, `draw_into_cell` turns it into pixels. Placing the
     /// outline rather than finished pixels keeps edges exact at sub-pixel
     /// offsets.
     ///
@@ -249,14 +257,18 @@ impl<'a> RasterizationInfo<'a> {
             return vec![vec![0; self.raster_width]; self.raster_height];
         };
         let scale_x = (self.raster_width as f32 / (bounds.x_max - bounds.x_min)).min(1.0);
-        self.draw_on_baseline(c, &glyph, bounds, scale_x)
+        if scale_x < MIN_HORIZONTAL_SQUEEZE {
+            self.draw_scaled_down(c, &glyph, bounds, scale_x)
+        } else {
+            self.draw_on_baseline(c, &glyph, bounds, scale_x)
+        }
     }
 
     /// Draws a regular glyph on the common baseline.
     ///
-    /// The advance width is centered in the cell. Glyphs wider than the cell
-    /// are compressed horizontally by `scale_x`, which keeps their hinting
-    /// intact. Glyphs are never moved vertically, as this would break
+    /// The advance width is centered in the cell. Glyphs slightly wider than
+    /// the cell are compressed horizontally by `scale_x`, which keeps their
+    /// hinting intact. Glyphs are never moved vertically, as this would break
     /// the common baseline.
     fn draw_on_baseline(
         &self,
@@ -271,6 +283,26 @@ impl<'a> RasterizationInfo<'a> {
             .max(-bounds.x_min * scale_x)
             .min(bounds.x_max.mul_add(-scale_x, raster_width));
         self.draw_into_cell(c, glyph, &self.hinting, scale_x, dx, self.baseline)
+    }
+
+    /// Draws a glyph that is much wider than the cell (e.g. '�') scaled down.
+    ///
+    /// The glyph is hinted at the smaller font size and centered horizontally.
+    /// Its vertical center stays where it is relative to the baseline.
+    fn draw_scaled_down(
+        &self,
+        c: char,
+        glyph: &OutlineGlyph,
+        bounds: BoundingBox,
+        scale: f32,
+    ) -> Vec<Vec<u8>> {
+        let hinting = Self::hinting_instance(&self.font, self.font_size * scale);
+        let scaled = glyph_bounds(glyph, &hinting).unwrap();
+        let dx = (self.raster_width as f32 - (scaled.x_max - scaled.x_min)) / 2.0 - scaled.x_min;
+        // Round to keep the hinted outline aligned to the pixel grid.
+        let center_shift = (scaled.y_min + scaled.y_max - bounds.y_min - bounds.y_max) / 2.0;
+        let dy = self.baseline + center_shift.round();
+        self.draw_into_cell(c, glyph, &hinting, 1.0, dx, dy)
     }
 
     /// Turns a glyph outline into the pixels of a cell.
@@ -447,6 +479,17 @@ mod tests {
         // Thanks to the hinting, the stems of 'H' end sharply.
         let raster = props.rasterize('H');
         assert_eq!(raster[12], raster[11]);
+    }
+
+    /// Glyphs much wider than the cell are scaled down rather than cut off.
+    #[test]
+    fn test_rasterize_wide_glyph() {
+        let props = RasterizationInfo::new(16, NOTO_SANS_MONO_REGULAR);
+        let raster = props.rasterize('\u{fffd}');
+        let left = raster.iter().map(|row| row[0]).max().unwrap();
+        let right = raster.iter().map(|row| row[6]).max().unwrap();
+        assert!(left > 0 && left < 255);
+        assert!(right > 0 && right < 255);
     }
 
     /// Glyphs slightly wider than the cell are compressed but keep their height.

@@ -95,10 +95,9 @@ you can use
 `$ cargo run --example show_chars_in_window --features all`
 
 ## Limitations & FAQ
-- _The replacement character `�` looks compressed._ \
+- _The replacement character `�` is smaller than other characters._ \
   In Noto Sans Mono, `�` is twice as wide as all other characters. To keep the
-  mono font guarantee, it is compressed horizontally to fit into a single
-  character cell.
+  mono font guarantee, it is scaled down to fit into a single character cell.
 - _How are the characters placed in their raster?_ \
   The raster height is the line height of the font (ascender and descender),
   so all characters share a common baseline and none of them is cut off. You
