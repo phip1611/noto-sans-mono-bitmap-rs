@@ -51,7 +51,7 @@ regular = []
 bold = []
 
 
-# all available raster heights (the font size is ~84% of this)
+# all available raster heights (the font size is ~73% of this)
 size_16 = []
 size_20 = []
 size_24 = []
