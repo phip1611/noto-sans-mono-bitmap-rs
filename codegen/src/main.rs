@@ -183,6 +183,12 @@ fn codegen_lib_rs() {
     let mut weight_modules = String::new();
     {
         SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
+            writeln!(
+                &mut weight_modules,
+                "#[cfg(feature = \"{}\")]",
+                w.mod_name()
+            )
+            .unwrap();
             writeln!(&mut weight_modules, "mod {};", w.mod_name()).unwrap();
         });
     }
