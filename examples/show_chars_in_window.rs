@@ -40,7 +40,7 @@ fn print_msg(line: usize, buffer_width: usize, draw_buffer: &mut [u32]) {
     for (char_i, char) in MSG.chars().enumerate() {
         let char_raster = get_raster(char, FONT_WEIGHT, RASTER_HEIGHT).expect("unknown char");
         let line_offset = line * char_raster.height();
-        for (row_i, row) in char_raster.raster().iter().enumerate() {
+        for (row_i, row) in char_raster.rows().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 let (r, g, b) = (*intensity as u32, *intensity as u32, *intensity as u32);
                 let (r, g, b) = (255 - r, 255 - g, 255 - b);
