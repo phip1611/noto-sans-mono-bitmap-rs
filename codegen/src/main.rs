@@ -12,19 +12,23 @@
 
 use codegen::bytes_outsourcer::{BytesToFileOutsourcer, Context};
 use codegen::font::{FontWeight, RasterizationInfo, SUPPORTED_FONT_WEIGHTS, noto_font_by_weight};
+use codegen::unicode::UnicodeRange;
 use codegen::{
-    CARGO_LIB_RS, CARGO_TOML_TEMPLATE, CODEGEN_BASE_PATH, CODEGEN_RASTERIZED_BYTES_PATH,
-    SIZE_MOD_TEMPLATE, SUPPORTED_RASTER_HEIGHTS, SUPPORTED_UNICODE_RANGES, WEIGHT_MOD_TEMPLATE,
+    CARGO_LIB_RS, CARGO_TOML_TEMPLATE, CODEGEN_BASE_PATH, CODEGEN_RASTERIZED_BYTES_DIR_NAME,
+    CODEGEN_RASTERIZED_BYTES_PATH, SIZE_MOD_TEMPLATE, SUPPORTED_RASTER_HEIGHTS,
+    SUPPORTED_UNICODE_RANGES, WEIGHT_MOD_TEMPLATE,
 };
 use std::fmt::Write as FmtWrite;
-use std::fs::{File, create_dir};
+use std::fs::{File, create_dir, create_dir_all};
 use std::io::Write as IoWrite;
+use std::ops::RangeInclusive;
 use std::path::PathBuf;
 
 /// Binary that does all the codegen.
 fn main() {
     // Shared instance for the font rasterization of all characters. Ensures unique filenames
-    // so that I can `include!` the Rust definitions for the rasterized characters.
+    // so that I can `include_bytes!` the binary blobs with the rasterized characters.
+    create_dir_all(CODEGEN_RASTERIZED_BYTES_PATH).unwrap();
     let mut bytes_outsourcer = BytesToFileOutsourcer::new(CODEGEN_RASTERIZED_BYTES_PATH);
 
     // create the font weight modules for each supported font weight.
@@ -183,6 +187,12 @@ fn codegen_lib_rs() {
     let mut weight_modules = String::new();
     {
         SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
+            writeln!(
+                &mut weight_modules,
+                "#[cfg(feature = \"{}\")]",
+                w.mod_name()
+            )
+            .unwrap();
             writeln!(&mut weight_modules, "mod {};", w.mod_name()).unwrap();
         });
     }
@@ -293,6 +303,57 @@ fn codegen_lib_rs() {
         });
     }
 
+    // codegen the lists of enabled font weights, raster heights, and supported
+    // chars for the unit tests of the generated crate
+    let mut test_font_weights = String::new();
+    SUPPORTED_FONT_WEIGHTS.iter().for_each(|w| {
+        writeln!(
+            &mut test_font_weights,
+            "        #[cfg(feature = \"{}\")]",
+            w.mod_name()
+        )
+        .unwrap();
+        writeln!(
+            &mut test_font_weights,
+            "        FontWeight::{:?},",
+            w.name()
+        )
+        .unwrap();
+    });
+    let mut test_raster_heights = String::new();
+    SUPPORTED_RASTER_HEIGHTS.iter().for_each(|size| {
+        writeln!(
+            &mut test_raster_heights,
+            "        #[cfg(feature = \"{}\")]",
+            size.feature_name()
+        )
+        .unwrap();
+        writeln!(
+            &mut test_raster_heights,
+            "        RasterHeight::Size{},",
+            size.value()
+        )
+        .unwrap();
+    });
+    let mut test_char_segments = String::new();
+    SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
+        for segment in range.segments() {
+            writeln!(
+                &mut test_char_segments,
+                "        #[cfg(feature = \"{}\")]",
+                range.feature_name
+            )
+            .unwrap();
+            writeln!(
+                &mut test_char_segments,
+                "        RangeInclusive::new('\\u{{{:x}}}', '\\u{{{:x}}}'),",
+                *segment.chars.start() as u32,
+                *segment.chars.end() as u32
+            )
+            .unwrap();
+        }
+    });
+
     // replace placeholders
     {
         writeln!(
@@ -312,6 +373,15 @@ fn codegen_lib_rs() {
                 .replace(
                     "// %CODEGEN_get_raster_WIDTH%",
                     get_raster_width_match.as_str()
+                )
+                .replace("// %CODEGEN_TEST_FONT_WEIGHTS%", test_font_weights.as_str())
+                .replace(
+                    "// %CODEGEN_TEST_RASTER_HEIGHTS%",
+                    test_raster_heights.as_str()
+                )
+                .replace(
+                    "// %CODEGEN_TEST_CHAR_SEGMENTS%",
+                    test_char_segments.as_str()
                 )
         )
         .unwrap();
@@ -356,8 +426,9 @@ fn codegen_font_weight_module(
     }
 }
 
-/// Creates a `<weight>/size_<size>.rs` file performs all the code generation for the byte look-up of
-/// the pre-rasterized characters.
+/// Creates a `<weight>/size_<size>.rs` file and the binary glyph blobs (one per unicode range) it
+/// includes, and performs all the code generation for the look-up of the pre-rasterized
+/// characters.
 fn codegen_font_weight_sub_modules(
     font: RasterizationInfo,
     weight: &FontWeight,
@@ -379,132 +450,155 @@ fn codegen_font_weight_sub_modules(
     };
 
     // this block prepares the head of the just generated file
-    {
+    let mut code = SIZE_MOD_TEMPLATE
+        .replace("%FONT_WEIGHT%", weight.mod_name())
+        .replace("%FONT_SIZE%", &format!("{}", font.raster_height()))
+        .replace(
+            "%CODEGEN_RASTER_HEIGHT%",
+            &format!("{}", font.raster_height()),
+        )
+        .replace(
+            "%CODEGEN_RASTER_WIDTH%",
+            &format!("{}", font.raster_width()),
+        );
+
+    // The match arms of `get_char`: one per segment of consecutive code points.
+    let mut match_arms = String::new();
+
+    // For each unicode range: one blob with all glyphs back to back, one static that includes
+    // the blob, and the match arms that map chars to the index of their glyph in the blob.
+    for range in SUPPORTED_UNICODE_RANGES {
+        let blob = codegen_glyph_blob(&font, range);
+        let glyph_count = range.iter().count();
+
+        let outsourced_path = outsourcer.outsource_bytes(
+            &blob,
+            Context {
+                weight: *weight,
+                height: font.raster_height() as u32,
+                unicode_range: range.feature_name,
+            },
+        );
+        let file_name = outsourced_path.file_name().unwrap().to_str().unwrap();
+
+        let static_name = range.feature_name.to_uppercase().replace('-', "_");
+
+        // `1 * GLYPH_LEN` would trigger `clippy::identity_op`
+        let blob_len = if glyph_count == 1 {
+            "GLYPH_LEN".to_string()
+        } else {
+            format!("{glyph_count} * GLYPH_LEN")
+        };
+
+        writeln!(&mut code).unwrap();
         writeln!(
-            &mut size_mod_file,
-            "{}",
-            SIZE_MOD_TEMPLATE
-                .replace("%FONT_WEIGHT%", weight.mod_name())
-                .replace("%FONT_SIZE%", &format!("{}", font.raster_height()))
-                .replace(
-                    "%CODEGEN_RASTER_HEIGHT%",
-                    &format!("{}", font.raster_height())
-                )
-                .replace(
-                    "%CODEGEN_RASTER_WIDTH%",
-                    &format!("{}", font.raster_width())
-                )
+            &mut code,
+            "/// The glyphs of the unicode range `{}` ({glyph_count} in total), back to back.",
+            range.feature_name
         )
         .unwrap();
+        writeln!(&mut code, "#[cfg(feature = \"{}\")]", range.feature_name).unwrap();
+        writeln!(
+            &mut code,
+            "static {static_name}: [u8; {blob_len}] = \
+            *include_bytes!(\"../{}/{file_name}\");",
+            CODEGEN_RASTERIZED_BYTES_DIR_NAME
+        )
+        .unwrap();
+
+        for segment in range.segments() {
+            let (first_index, first_char) = (segment.first_index, *segment.chars.start() as u32);
+            // Index of the glyph in the blob.
+            let index_expr = if segment.chars.start() == segment.chars.end() {
+                format!("{first_index}")
+            } else if first_index == 0 {
+                format!("c as usize - 0x{first_char:x}")
+            } else {
+                format!("c as usize - 0x{first_char:x} + {first_index}")
+            };
+            writeln!(
+                &mut match_arms,
+                "        #[cfg(feature = \"{}\")]",
+                range.feature_name
+            )
+            .unwrap();
+            writeln!(
+                &mut match_arms,
+                "        {} => Some(crate::glyph_at(&{static_name}, GLYPH_LEN, {index_expr})),",
+                char_range_pattern(&segment.chars)
+            )
+            .unwrap();
+        }
     }
 
-    // the rest of the file generates the big match-block that maps characters to the pre-rasterized
-    // bytes.
+    // the "get_char" function with its match block
+    writeln!(&mut code).unwrap();
+    writeln!(
+        &mut code,
+        "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
+        /// Wide characters, such as '�', are scaled down to fit into the raster in order to\n\
+        /// fulfill the mono font guarantee. All characters share a common baseline.\n\
+        ///\n\
+        /// The returned slice is exactly [`GLYPH_LEN`] bytes in row-major order.",
+        weight.mod_name(),
+        font.font_size().round()
+    )
+    .unwrap();
+    writeln!(&mut code, "#[inline]").unwrap();
+    writeln!(
+        &mut code,
+        "pub const fn get_char(c: char) -> Option<&'static [u8]> {{"
+    )
+    .unwrap();
+    writeln!(&mut code, "    match c {{").unwrap();
+    code.push_str(&match_arms);
+    writeln!(&mut code, "        _ => None,").unwrap();
+    writeln!(&mut code, "    }}").unwrap();
+    writeln!(&mut code, "}}").unwrap();
 
-    // prepares the "get_char" function with its match block
-    let mut code_range_string = String::new();
-    {
-        writeln!(
-            &mut code_range_string,
-            "/// Returns the raster of the given character for font weight {} and font size {}px.\n\
-            /// Wide characters, such as '�', are scaled down to fit into the raster in order to\n\
-            /// fulfill the mono font guarantee. All characters share a common baseline.",
-            weight.mod_name(),
-            font.font_size().round()
-        )
-        .unwrap();
-        writeln!(&mut code_range_string, "#[inline]").unwrap();
-        writeln!(
-            &mut code_range_string,
-            "pub const fn get_char(c: char) -> Option<&'static [&'static [u8]]> {{"
-        )
-        .unwrap();
-        writeln!(&mut code_range_string, "    match c {{").unwrap();
-    }
-
-    // now we generate all the single match arms per character
-
-    // iterates through all ranges and for each range over all visible characters
-    SUPPORTED_UNICODE_RANGES.iter().for_each(|range| {
-        range
-            .iter()
-            .map(|char| (char, font.rasterize(char)))
-            .for_each(|(char, raster)| {
-                writeln!(
-                    &mut code_range_string,
-                    "        // letter: '{}' / {:?}",
-                    char, char as usize as *const usize
-                )
-                .unwrap();
-
-                // make this character optional by it's unicode range
-                writeln!(
-                    &mut code_range_string,
-                    "#[cfg(feature = \"{}\")]",
-                    range.feature_name
-                )
-                .unwrap();
-
-                // generate source code representation of raster
-                let rust_raster_source_code = codegen_raster(&raster);
-
-                let outsourced_path = outsourcer.outsource_bytes(
-                    rust_raster_source_code.as_bytes(),
-                    Context {
-                        c: char,
-                        weight: *weight,
-                        height: font.raster_height() as u32,
-                    },
-                );
-
-                // generate left side of the match arm
-                {
-                    if char == '\\' || char == '\'' {
-                        write!(&mut code_range_string, "        '\\{}'", char,).unwrap();
-                    } else {
-                        write!(&mut code_range_string, "        '{}'", char,).unwrap()
-                    }
-                }
-                // generate right side of the match arm
-                {
-                    // this is (as the rest of the codegen stuff) very ugly.
-                    // need to adapt the path, so that cargo can find it during compilation..
-                    let path = format!(
-                        "../res_rasterized_characters/{}",
-                        outsourced_path.file_name().unwrap().to_str().unwrap()
-                    );
-                    writeln!(&mut code_range_string, "=> Some(include!(\"{}\")),", path).unwrap();
-                }
-            })
-    });
-    writeln!(&mut code_range_string, "        _ => None").unwrap();
-    // close match
-    writeln!(&mut code_range_string, "    }}").unwrap();
-    // close function
-    writeln!(&mut code_range_string, "}}").unwrap();
-
-    size_mod_file
-        .write_all(code_range_string.as_bytes())
-        .unwrap();
+    size_mod_file.write_all(code.as_bytes()).unwrap();
 }
 
-/// Generates the Rust source code of type `&[&u8]]` from a raster.
-fn codegen_raster(raster: &Vec<Vec<u8>>) -> String {
-    let mut rust_byte_array_str = String::new();
-    writeln!(&mut rust_byte_array_str, "&[").unwrap();
-    for row in raster {
-        write!(&mut rust_byte_array_str, "    &[").unwrap();
-        for (i, byte) in row.iter().enumerate() {
-            if i == row.len() - 1 {
-                write!(&mut rust_byte_array_str, "{}", byte).unwrap();
-            } else {
-                write!(&mut rust_byte_array_str, "{}, ", byte).unwrap();
-            }
-        }
-        writeln!(&mut rust_byte_array_str, "],").unwrap();
+/// Rasterizes all chars of the unicode range and returns their glyphs back to back, in the
+/// order of [`UnicodeRange::iter`].
+fn codegen_glyph_blob(font: &RasterizationInfo, range: &UnicodeRange) -> Vec<u8> {
+    let (width, height) = (font.raster_width(), font.raster_height());
+    let mut blob = Vec::with_capacity(range.iter().count() * width * height);
+    for c in range.iter() {
+        append_glyph(&mut blob, &font.rasterize(c), width, height);
     }
-    write!(&mut rust_byte_array_str, "]").unwrap();
-    rust_byte_array_str
+    blob
+}
+
+/// Appends the raster (a vector of rows) of a glyph to the blob in flat row-major order. Asserts
+/// that the raster has exactly the given dimensions.
+fn append_glyph(blob: &mut Vec<u8>, raster: &[Vec<u8>], width: usize, height: usize) {
+    assert_eq!(
+        raster.len(),
+        height,
+        "raster must have exactly {height} rows"
+    );
+    for row in raster {
+        assert_eq!(
+            row.len(),
+            width,
+            "each row must have exactly {width} pixels"
+        );
+        blob.extend_from_slice(row);
+    }
+}
+
+/// Returns a Rust pattern that matches the chars, such as `'\u{a1}'..='\u{ac}'`.
+fn char_range_pattern(chars: &RangeInclusive<char>) -> String {
+    if chars.start() == chars.end() {
+        format!("'\\u{{{:x}}}'", *chars.start() as u32)
+    } else {
+        format!(
+            "'\\u{{{:x}}}'..='\\u{{{:x}}}'",
+            *chars.start() as u32,
+            *chars.end() as u32
+        )
+    }
 }
 
 #[cfg(test)]
@@ -513,16 +607,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_codegen_raster() {
-        let raster = [[1, 2, 3].to_vec(), [4, 5, 6].to_vec(), [7, 8, 9].to_vec()].to_vec();
-        let generated_source_code = codegen_raster(&raster);
+    fn test_append_glyph() {
+        let mut blob = vec![42];
+        let raster = [[1, 2, 3].to_vec(), [4, 5, 6].to_vec()];
+        append_glyph(&mut blob, &raster, 3, 2);
+        assert_eq!(blob, [42, 1, 2, 3, 4, 5, 6]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_append_glyph_wrong_width() {
+        let raster = [[1, 2, 3].to_vec(), [4, 5].to_vec()];
+        append_glyph(&mut Vec::new(), &raster, 3, 2);
+    }
+
+    #[test]
+    fn test_char_range_pattern() {
         assert_eq!(
-            "&[\n\
-            \x20\x20\x20\x20&[1, 2, 3],\n\
-            \x20\x20\x20\x20&[4, 5, 6],\n\
-            \x20\x20\x20\x20&[7, 8, 9],\n\
-            ]",
-            &generated_source_code
+            char_range_pattern(&('\u{a1}'..='\u{ac}')),
+            "'\\u{a1}'..='\\u{ac}'"
         );
+        assert_eq!(char_range_pattern(&('�'..='�')), "'\\u{fffd}'");
     }
 }

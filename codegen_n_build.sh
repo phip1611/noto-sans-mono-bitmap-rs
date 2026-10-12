@@ -12,8 +12,8 @@ cd "$DIR" || exit
 
 echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the build, and applies Rustfmt and clippy afterwards."
 
-# Delete all generated raster files from previous run
-find src/res_rasterized_characters -type f -name "*.txt" -exec rm {} +
+# Delete all generated raster files (binary glyph blobs) from previous run
+rm -rf src/res_rasterized_characters
 
 cd "codegen" || exit
 if [ "$1" != "--ci" ]; then

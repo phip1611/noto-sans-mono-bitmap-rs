@@ -1,0 +1,2 @@
+# Generated glyph blobs (raw pixel bytes); see codegen/.
+src/res_rasterized_characters/*.bin binary
