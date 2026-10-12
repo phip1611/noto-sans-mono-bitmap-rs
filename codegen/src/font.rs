@@ -5,6 +5,24 @@
 //! or floating point math at runtime. All font handling happens here, at build
 //! time.
 //!
+//! # Terminology
+//!
+//! - **Glyph:** the visual shape of a character in a font, e.g. the shape of
+//!   'A'. The font file stores it as an outline (lines and curves).
+//! - **Cell:** the fixed-size box of pixels a glyph is drawn into (also called
+//!   raster). All cells of one font weight and raster height have the same
+//!   size, so text can be laid out on a grid, like in a terminal.
+//! - **Baseline:** the line letters sit on. Descenders, as in 'g' or 'p', reach
+//!   below it.
+//! - **Ascender, descender:** how far the font reaches above and below the
+//!   baseline, including room for accents and descenders.
+//! - **Advance width:** how far the text cursor moves after a glyph. It is the
+//!   same for all glyphs of a mono font.
+//! - **Hinting:** adjusting an outline so that its edges line up with the pixel
+//!   grid, which makes small text crisp.
+//! - **Coverage:** how much of a pixel the glyph covers, from 0 (not at all) to
+//!   255 (fully).
+//!
 //! # Who Does What
 //!
 //! - [`skrifa`] reads the font file: the font's metrics (ascender, advance
@@ -34,11 +52,28 @@
 //!    byte is the coverage of a pixel (0: empty, 255: full), without gamma
 //!    correction.
 //!
+//! # Aligning Glyphs in a Cell
+//!
+//! Text only looks right if the glyphs of neighboring cells line up. The
+//! common practice, e.g. in terminal emulators, is to derive all positions
+//! from the font's metrics rather than from the ink of each glyph:
+//!
+//! - **One common baseline:** the baseline is on the same row in every cell
+//!   and each glyph is drawn relative to it. Centering the ink of each glyph
+//!   vertically instead would move short letters like 'x' up and letters with
+//!   descenders like 'g' even further up, so the text would look wavy.
+//! - **Cell height from the font's line height:** the cell covers the
+//!   ascender and descender, so accents ('Å') and descenders ('g') fit without
+//!   being cut off, and lines can be stacked without gaps or overlaps.
+//! - **Baseline on a pixel boundary:** otherwise, the bottom edge of every
+//!   letter is blurred across two pixel rows.
+//! - **Placement by advance width, not by ink:** each glyph keeps its position
+//!   on its advance width, so the spacing the font designer intended is kept.
+//! - **Shrink, don't clip:** a glyph that is too wide is compressed or scaled
+//!   down, never cut off.
+//!
 //! # Why This Way
 //!
-//! - **Font metrics:** cells placed next to and below each other look like
-//!   properly typeset text, as all glyphs share one baseline and nothing is cut
-//!   off.
 //! - **Light auto-hinting** (like FreeType's `FT_LOAD_TARGET_LIGHT`): at the
 //!   small font sizes used here (about 12 to 24 px), unhinted edges blur
 //!   across two pixel rows. The hinter snaps the baseline, x-height, cap
