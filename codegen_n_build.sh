@@ -16,7 +16,7 @@ echo "This script generates the crate 'noto-sans-mono-bitmap', verifies the buil
 rm -rf src/res_rasterized_characters
 
 cd "codegen" || exit
-if [ "$1" != "--ci" ]; then
+if [ "${1:-}" != "--ci" ]; then
   cargo update
 else
   echo "Skipping \`cargo update\`"
@@ -30,7 +30,7 @@ cd ..
 # formatting. Hence, we always execute this step.
 cargo fmt
 
-if [ "$1" != "--ci" ]; then
+if [ "${1:-}" != "--ci" ]; then
   cargo test --doc --features all
   cargo test --all-targets --features all
   cargo clippy --features all  --all-targets
