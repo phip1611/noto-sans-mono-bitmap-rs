@@ -16,7 +16,7 @@
 //! * ✅ different sizes and font weights (light, normal, bold)
 //! * ✅ nice anti-aliasing/smoothing and better looking than legacy bitmap fonts
 //! * ✅ every pixel is encoded in a byte (0-255) and not a bit, which results in a much nicer result on the screen.
-//! * ✅ relevant font sizes, such as 14, 18, 22, and 32px (as optional build time features)
+//! * ✅ raster heights of 16, 20, 24, and 32px, i.e., font sizes of about 12, 15, 18, and 23px (as optional build time features)
 //! * ✅ zero dependencies
 //! * ✅ All characters are aligned in their box/raster. If they are printed next to each other, the result looks nice.
 //!
