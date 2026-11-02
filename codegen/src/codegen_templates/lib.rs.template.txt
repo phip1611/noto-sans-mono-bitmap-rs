@@ -205,8 +205,8 @@ pub const fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Optio
 /// Returns the width in pixels a char will occupy on the screen.
 ///
 /// The width is constant for all characters regarding the same combination
-/// of [`FontWeight`] and [`RasterHeight`]. The width is a few percent smaller
-/// than the height of each char
+/// of [`FontWeight`] and [`RasterHeight`]. It is the advance width of the mono
+/// font, which is about 45% of the raster height.
 #[inline]
 pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
