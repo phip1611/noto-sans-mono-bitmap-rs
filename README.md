@@ -62,7 +62,8 @@ fn main() {
     let char_raster =
         get_raster('A', FontWeight::Regular, RasterHeight::Size16).expect("unsupported char");
     println!("{:?}", char_raster);
-    for (row_i, row) in char_raster.raster().iter().enumerate() {
+    // The pixels are stored in row-major order: one byte (intensity 0..=255) per pixel.
+    for (row_i, row) in char_raster.rows().enumerate() {
         for (col_i, pixel) in row.iter().enumerate() {
             println!("[{:02}][{:02}]: {:03}", row_i, col_i, pixel);
         }
@@ -74,15 +75,18 @@ fn main() {
 The `external/check-size` crate provides you with insights on the overhead of
 having this library statically compiled into the binary.
 
-By default, only a reasonable subset of possible features is included. The raw crate-size is a few
-MiB in size but after compilation and discarding irrelevant parts (i.e., size 14, regular font,
-only ASCII), the overhead should be at less than 120 KiB in binary size, according to my
-measurements. However, even with the `all` feature, depending on your code, the
-compiler can reliably discard unreachable or unused code paths. Nevertheless, it
-is recommended to include no more features than necessary.
+Each glyph is stored as exactly `width * height` bytes (one byte per pixel)
+without any per-glyph or per-row overhead, and the glyphs of each combination
+of font weight, raster height, and unicode range are one contiguous blob. Only
+the blobs of enabled features are compiled in.
+
+By default, only a reasonable subset of possible features is included (size 16, regular font,
+only ASCII), which adds roughly 10 KiB of glyph data to the binary. Even with the `all` feature,
+depending on your code, the compiler can reliably discard unreachable or unused font weights and
+raster heights. Nevertheless, it is recommended to include no more features than necessary.
 
 With all features included inside the binary, and without any discarding by the compiler, you
-can expect 5 or more MiB of memory consumption. However, this would require the rather unlikely
+can expect roughly 1 MiB of memory consumption. However, this would require the rather unlikely
 case that you use different sizes and font weights simultaneously and all the unicode ranges.
 
 

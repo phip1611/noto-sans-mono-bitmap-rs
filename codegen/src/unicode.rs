@@ -89,12 +89,48 @@ impl UnicodeRange {
         self.feature_name
     }
 
+    /// Splits the range into segments of consecutive code points.
+    ///
+    /// The ignored symbols leave gaps in a range. For example, Latin-1
+    /// Supplement without its control characters, U+00A0, and U+00AD consists
+    /// of the segments `'¡'..='¬'` (first index 0) and `'®'..='ÿ'` (first
+    /// index 12).
+    pub fn segments(&self) -> Vec<Segment> {
+        let mut segments = Vec::<Segment>::new();
+        for (index, c) in self.iter().enumerate() {
+            // Extend the current segment if `c` directly follows its last char.
+            if let Some(segment) = segments.last_mut()
+                && *segment.chars.end() as u32 + 1 == c as u32
+            {
+                segment.chars = *segment.chars.start()..=c;
+                continue;
+            }
+            // Otherwise, a new segment starts (at the beginning or after a gap).
+            segments.push(Segment {
+                first_index: index,
+                chars: c..=c,
+            });
+        }
+        segments
+    }
+
     /// Returns true if the symbol is in one of the specified ranges of ignored symbols.
     fn symbol_is_ignored(&self, symbol: u32) -> bool {
         self.ignored_symbols
             .iter()
             .any(|ignored_symbols| ignored_symbols.contains(&symbol))
     }
+}
+
+/// A part of a [`UnicodeRange`] without gaps, i.e., with consecutive code
+/// points.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Segment {
+    /// Position of the first char in [`UnicodeRange::iter`], which is also the
+    /// index of its glyph in the generated blob of the range.
+    pub first_index: usize,
+    /// The chars of the segment.
+    pub chars: RangeInclusive<char>,
 }
 
 /// Iterator over all characters of a [`UnicodeRange`] with respect to ignored
@@ -276,6 +312,41 @@ mod tests {
                 .filter(|r2| r1.0 != r2.0)
                 .for_each(|r2| assert_ne!(r1.1, r2.1))
         })
+    }
+
+    #[test]
+    fn test_unicode_range_segments() {
+        let segment = |first_index, chars| Segment { first_index, chars };
+        assert_eq!(ranges::BASIC_LATIN.segments(), [segment(0, ' '..='~')]);
+        assert_eq!(
+            ranges::LATIN_1_SUPPLEMENT.segments(),
+            [
+                segment(0, '\u{a1}'..='\u{ac}'),
+                segment(12, '\u{ae}'..='\u{ff}')
+            ]
+        );
+        assert_eq!(
+            ranges::LATIN_EXTENDED_A.segments(),
+            [segment(0, '\u{100}'..='\u{17f}')]
+        );
+        assert_eq!(ranges::SPECIALS.segments(), [segment(0, '�'..='�')]);
+
+        // The segments cover exactly the chars of the iterator, in the same
+        // order.
+        for range in SUPPORTED_UNICODE_RANGES {
+            let from_segments = range
+                .segments()
+                .into_iter()
+                .flat_map(|segment| segment.chars)
+                .collect::<Vec<_>>();
+            assert_eq!(from_segments, range.iter().collect::<Vec<_>>());
+            for segment in range.segments() {
+                assert_eq!(
+                    range.iter().nth(segment.first_index),
+                    Some(*segment.chars.start())
+                );
+            }
+        }
     }
 
     // Ensure that the SUPPORTED_UNICODE_RANGES are in a total order.

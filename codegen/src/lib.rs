@@ -74,6 +74,9 @@ pub const CARGO_LIB_RS: &str = include_str!("codegen_templates/lib.rs.template.t
 
 /// Path into the main repository, where the codegen manipulates files.
 pub const CODEGEN_BASE_PATH: &str = "../src/";
+/// Name of the directory (in [`CODEGEN_BASE_PATH`]) with the binary blobs of the rasterized
+/// characters: one blob per font weight, raster height, and unicode range.
+pub const CODEGEN_RASTERIZED_BYTES_DIR_NAME: &str = "res_rasterized_characters";
 /// Contains the rasterized bytes of all characters.
 pub const CODEGEN_RASTERIZED_BYTES_PATH: &str = "../src/res_rasterized_characters";
 
