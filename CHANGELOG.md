@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.4.0 (TBD)
+## v0.4.0 (2026-11-02)
+
+This release significantly improves font rendering with larger, sharper, and
+better-aligned characters, while significantly reducing crate size and
+compilation times through more efficient glyph storage. It also upgrades to
+Rust 2024 (MSRV 1.85.0) and introduces breaking API changes to RasterizedChar
+and FontWeight.
+
 - Rust edition 2024
 - MSRV 1.85.0
 - Improved rendering of all characters:
