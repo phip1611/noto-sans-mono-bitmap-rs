@@ -35,6 +35,7 @@
   and removes the per-row pointers (and their relocations in position
   independent binaries) from the compiled binary. `get_raster()` and
   `get_raster_width()` remain `const fn`.
+- `FontWeight` and `RasterHeight` now implement `PartialEq`, `Eq`, and `Hash`.
 
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`

@@ -138,7 +138,7 @@ impl RasterizedChar {
 /// Supported font weights.
 ///
 /// The available variants depend on the selected Cargo build features.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(usize)]
 pub enum FontWeight {
     // %CODEGEN_FONT_WEIGHT_VARIANTS%
@@ -161,7 +161,7 @@ impl FontWeight {
 /// is less than the height.
 ///
 /// The available variants depend on the selected Cargo build features.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(usize)]
 pub enum RasterHeight {
     // %CODEGEN_RASTER_SIZE_ENUM_VARIANTS%
