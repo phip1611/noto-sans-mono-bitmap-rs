@@ -53,7 +53,7 @@ fn draw_string(
 ) {
     for (char_i, char) in msg.chars().enumerate() {
         let char_raster = get_raster(char, font_weight, raster_height).expect("unknown char");
-        for (row_i, row) in char_raster.raster().iter().enumerate() {
+        for (row_i, row) in char_raster.rows().enumerate() {
             for (col_i, intensity) in row.iter().enumerate() {
                 //Figure out the index of the pixel to update
                 let index = char_i * char_raster.width()
