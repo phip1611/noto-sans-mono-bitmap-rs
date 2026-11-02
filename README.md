@@ -21,7 +21,7 @@ and not as a bit, which results in a much nicer result on the screen.
 * ✅ zero dependencies
 * ✅ All characters are aligned in their box/raster. If they are printed next to each other, the result looks nice.
 
-![Screenshot of the bitmap font.](screenshot_bitmap_font.png "Screenshot of the bitmap font.")
+![Screenshot of the bitmap font.](screenshot_bitmap_font.webp "Screenshot of the bitmap font.")
 
 ## Developer Guide and Contributing
 Please check [CONTRIBUTING.md](./CONTRIBUTING.md).
