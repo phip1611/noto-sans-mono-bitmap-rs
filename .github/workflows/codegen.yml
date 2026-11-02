@@ -24,6 +24,9 @@ jobs:
 
   codestyle:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: codegen
     steps:
       - uses: actions/checkout@v7
       - name: Setup Rust toolchain
@@ -31,8 +34,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy,rustfmt
-      - run: cd codegen
       - name: Rustfmt
         run: cargo fmt -- --check
       - name: Clippy
-        run: cargo clippy --features all
+        run: cargo clippy --all-targets
