@@ -178,8 +178,9 @@ impl FontWeight {
 /// The raster height is the line height of the font: it covers the font's
 /// ascender and descender, so that all characters (i.e. ÄyA) fit in and share
 /// a common baseline. Hence, the font size is about 73% of the raster height.
-/// The width of each character is the advance width of the mono font, which
-/// is less than the height.
+/// The width of each character is the distance from one character to the
+/// next, as defined by the font, so it includes the spacing between
+/// characters. It is the same for all characters and less than the height.
 ///
 /// The available variants depend on the selected Cargo build features.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -261,8 +262,9 @@ pub const fn get_raster(c: char, style: FontWeight, size: RasterHeight) -> Optio
 /// Returns the width in pixels a char will occupy on the screen.
 ///
 /// The width is constant for all characters regarding the same combination
-/// of [`FontWeight`] and [`RasterHeight`]. It is the advance width of the mono
-/// font, which is about 45% of the raster height.
+/// of [`FontWeight`] and [`RasterHeight`]. It already includes the spacing
+/// between characters, so you can draw them directly next to each other. It is
+/// about 45% of the raster height.
 #[inline]
 pub const fn get_raster_width(style: FontWeight, size: RasterHeight) -> usize {
     match style {
