@@ -36,6 +36,10 @@
   independent binaries) from the compiled binary. `get_raster()` and
   `get_raster_width()` remain `const fn`.
 - `FontWeight` and `RasterHeight` now implement `PartialEq`, `Eq`, and `Hash`.
+- **Breaking** Removed `FontWeight::val()`. It returned the index of the font
+  weight among the enabled ones, so its value changed with the Cargo features.
+- A clear compile error names the missing feature if no font weight or no raster
+  height feature is enabled.
 
 ## v0.3.2 (2026-01-07)
 - `fn get_raster()` is not `const`

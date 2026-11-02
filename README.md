@@ -21,7 +21,7 @@ and not as a bit, which results in a much nicer result on the screen.
 * ✅ zero dependencies
 * ✅ All characters are aligned in their box/raster. If they are printed next to each other, the result looks nice.
 
-![Screenshot of the bitmap font.](screenshot_bitmap_font.png "Screenshot of the bitmap font.")
+![Screenshot of the bitmap font.](screenshot_bitmap_font.webp "Screenshot of the bitmap font.")
 
 ## Developer Guide and Contributing
 Please check [CONTRIBUTING.md](./CONTRIBUTING.md).
@@ -106,8 +106,9 @@ you can use
   The raster height is the line height of the font (ascender and descender),
   so all characters share a common baseline and none of them is cut off. You
   can render lines directly below each other without additional spacing. The
-  raster width is the advance width of the mono font. The outlines are
-  grid-fitted with an auto-hinter (vertical direction only), which makes small
+  raster width is the distance from one character to the next, as defined by
+  the font. It includes the spacing between characters, so you can draw them
+  directly next to each other. The outlines are grid-fitted with an auto-hinter (vertical direction only), which makes small
   sizes crisper. The pixel values describe the coverage of the pixel by the
   glyph (no gamma correction applied).
 

@@ -183,6 +183,39 @@ fn codegen_lib_rs() {
         .open(lib_rs_path)
         .unwrap();
 
+    // codegen the checks that at least one font weight and one raster height
+    // feature is enabled
+    let mut feature_checks = String::new();
+    for (group, features) in [
+        (
+            "font weight",
+            SUPPORTED_FONT_WEIGHTS
+                .iter()
+                .map(|w| w.mod_name().to_string())
+                .collect::<Vec<_>>(),
+        ),
+        (
+            "raster height",
+            SUPPORTED_RASTER_HEIGHTS
+                .iter()
+                .map(|h| h.feature_name())
+                .collect(),
+        ),
+    ] {
+        let cfgs = features
+            .iter()
+            .map(|f| format!("feature = \"{f}\""))
+            .collect::<Vec<_>>()
+            .join(", ");
+        writeln!(&mut feature_checks, "#[cfg(not(any({cfgs})))]").unwrap();
+        writeln!(
+            &mut feature_checks,
+            "compile_error!(\"enable at least one {group} feature: {}\");",
+            features.join(", ")
+        )
+        .unwrap();
+    }
+
     // codegen font weight modules
     let mut weight_modules = String::new();
     {
@@ -360,6 +393,7 @@ fn codegen_lib_rs() {
             &mut cargo_toml_file,
             "{}",
             CARGO_LIB_RS
+                .replace("// %CODEGEN_FEATURE_CHECKS%", feature_checks.as_str())
                 .replace("// %CODEGEN_LIB_MODULES%", weight_modules.as_str())
                 .replace(
                     "// %CODEGEN_FONT_WEIGHT_VARIANTS%",
